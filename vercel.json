@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "routes": [
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/loom-board", "dest": "/index.html" },
+    { "src": "/task-board.json", "dest": "/task-board.json" }
+  ],
+  "headers": [
+    {
+      "source": "/task-board.json",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache" }
+      ]
+    }
+  ]
+}
