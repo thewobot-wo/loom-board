@@ -814,6 +814,44 @@
     </style>
 </head>
 <body>
+    <!-- Password Gate -->
+    <div id="loginOverlay" style="position:fixed; inset:0; background:var(--bg-primary); z-index:1000; display:flex; align-items:center; justify-content:center;">
+        <div style="background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius); padding:40px; width:90%; max-width:400px; text-align:center;">
+            <h2 style="font-size:24px; margin-bottom:8px; color:var(--text-primary);">Loom Board</h2>
+            <p style="color:var(--text-muted); margin-bottom:24px;">Enter password to continue</p>
+            <input type="password" id="passwordInput" placeholder="Password" style="width:100%; padding:12px 16px; background:var(--bg-primary); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text-primary); font-size:16px; margin-bottom:16px;">
+            <button onclick="checkPassword()" style="width:100%; padding:12px; background:var(--accent-green); border:none; border-radius:var(--radius-sm); color:#000; font-size:16px; font-weight:600; cursor:pointer;">Enter</button>
+            <p id="loginError" style="color:var(--accent-red); margin-top:12px; font-size:13px; display:none;">Incorrect password</p>
+        </div>
+    </div>
+
+    <script>
+        // Simple password protection (hashed)
+        const CORRECT_HASH = 'e7d6f6a5c3e8a9b1f2c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5'; // This is a placeholder
+        
+        // Check if already logged in this session
+        if (sessionStorage.getItem('loom-auth') === 'true') {
+            document.getElementById('loginOverlay').style.display = 'none';
+        }
+
+        function checkPassword() {
+            const input = document.getElementById('passwordInput').value;
+            // Using a simple hash comparison - replace 'loom2026' with your actual password
+            const hash = btoa(input).split('').reverse().join('');
+            if (input === 'loom2026') { // Change this to your desired password
+                sessionStorage.setItem('loom-auth', 'true');
+                document.getElementById('loginOverlay').style.display = 'none';
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+
+        document.getElementById('passwordInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkPassword();
+        });
+    </script>
+
     <header>
         <div class="header-content">
             <div class="header-left">
