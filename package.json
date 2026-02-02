@@ -1,0 +1,22 @@
+{
+  "name": "loom-board",
+  "version": "1.0.0",
+  "description": "Loom Board - Kanban task tracker",
+  "scripts": {
+    "build": "echo 'Static site - no build needed'"
+  },
+  "vercel": {
+    "builds": [
+      {
+        "src": "index.html",
+        "use": "@vercel/static"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/(.*)",
+        "dest": "/index.html"
+      }
+    ]
+  }
+}

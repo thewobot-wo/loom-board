@@ -1,16 +1,18 @@
 {
   "version": 2,
-  "routes": [
-    { "src": "/", "dest": "/index.html" },
-    { "src": "/loom-board", "dest": "/index.html" },
-    { "src": "/task-board.json", "dest": "/task-board.json" }
-  ],
-  "headers": [
+  "builds": [
     {
-      "source": "/task-board.json",
-      "headers": [
-        { "key": "Cache-Control", "value": "no-cache" }
-      ]
+      "src": "index.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
