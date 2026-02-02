@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loom Task Board</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #30363d;
+        }
+        h1 { font-size: 24px; color: #f0f6fc; }
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #3fb950;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .status-dot.paused { background: #d29922; animation: none; }
+        .status-dot.error { background: #f85149; animation: none; }
+        .btn-small {
+            padding: 6px 12px;
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .btn-small:hover { background: #30363d; }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        .column {
+            background: #161b22;
+            border-radius: 12px;
+            padding: 16px;
+            min-height: 400px;
+        }
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .column-header.backlog { color: #8b949e; }
+        .column-header.in-progress { color: #58a6ff; }
+        .column-header.blocked { color: #f85149; }
+        .column-header.done { color: #3fb950; }
+        .count {
+            background: #30363d;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 100px;
+        }
+        .task {
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: grab;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .task:hover {
+            border-color: #58a6ff;
+            transform: translateY(-1px);
+        }
+        .task.dragging { opacity: 0.5; }
+        .task-title {
+            font-size: 14px;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        .task-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 11px;
+            color: #8b949e;
+        }
+        .task-tag {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        .tag-project { background: #1f6feb; color: #fff; }
+        .tag-research { background: #8957e5; color: #fff; }
+        .tag-bug { background: #f85149; color: #fff; }
+        .tag-feature { background: #3fb950; color: #fff; }
+        .tag-maintenance { background: #d29922; color: #000; }
+        .tag-cruise { background: #a371f7; color: #fff; }
+        .task-blocked-reason {
+            margin-top: 8px;
+            padding: 8px;
+            background: rgba(248, 81, 73, 0.1);
+            border-left: 3px solid #f85149;
+            border-radius: 0 4px 4px 0;
+            font-size: 12px;
+            color: #f85149;
+        }
+        .add-task {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            background: transparent;
+            border: 2px dashed #30363d;
+            border-radius: 8px;
+            color: #8b949e;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .add-task:hover {
+            border-color: #58a6ff;
+            color: #58a6ff;
+        }
+        .history-section {
+            margin-top: 32px;
+            background: #161b22;
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .history-header {
+            font-weight: 600;
+            margin-bottom: 16px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #8b949e;
+        }
+        .history-item {
+            display: flex;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid #21262d;
+            font-size: 13px;
+        }
+        .history-item:last-child { border-bottom: none; }
+        .history-time { color: #6e7681; min-width: 60px; }
+        .history-action { color: #58a6ff; }
+        .history-task { color: #c9d1d9; }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: #161b22;
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+        }
+        .modal-header {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: #8b949e;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            font-size: 14px;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary {
+            background: #238636;
+            color: #fff;
+        }
+        .btn-primary:hover { background: #2ea043; }
+        .btn-secondary {
+            background: #21262d;
+            color: #c9d1d9;
+        }
+        .btn-secondary:hover { background: #30363d; }
+        .btn-danger {
+            background: #da3633;
+            color: #fff;
+        }
+        .btn-danger:hover { background: #f85149; }
+        .current-task-banner {
+            background: linear-gradient(90deg, #1f6feb 0%, #8957e5 100%);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: none;
+        }
+        .current-task-banner.active { display: block; }
+        .current-task-banner.error {
+            background: linear-gradient(90deg, #da3633 0%, #f85149 100%);
+        }
+        .current-task-banner.paused {
+            background: linear-gradient(90deg, #d29922 0%, #e3b341 100%);
+        }
+        .current-task-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            margin-bottom: 4px;
+        }
+        .current-task-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .current-task-time {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+        .file-sync-status {
+            font-size: 11px;
+            color: #8b949e;
+            margin-top: 4px;
+        }
+        .file-sync-status.synced { color: #3fb950; }
+        .file-sync-status.error { color: #f85149; }
+        @media (max-width: 1024px) {
+            .board { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 640px) {
+            .board { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <h1>Loom Task Board</h1>
+            <div class="file-sync-status" id="syncStatus">Using local storage</div>
+        </div>
+        <div class="header-actions">
+            <button class="btn-small" onclick="exportData()">Export JSON</button>
+            <button class="btn-small" onclick="document.getElementById('fileInput').click()">Import JSON</button>
+            <input type="file" id="fileInput" accept=".json" style="display:none" onchange="importData(this)">
+            <div class="status-indicator">
+                <span class="status-dot" id="statusDot"></span>
+                <span id="statusText">Active</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="current-task-banner" id="currentTaskBanner">
+        <div class="current-task-label" id="currentTaskLabel">Currently Working On</div>
+        <div class="current-task-title" id="currentTaskTitle">-</div>
+        <div class="current-task-time" id="currentTaskTime">-</div>
+    </div>
+
+    <div class="board">
+        <div class="column" data-status="backlog">
+            <div class="column-header backlog">
+                <span>Backlog</span>
+                <span class="count" id="count-backlog">0</span>
+            </div>
+            <div class="task-list" id="backlog"></div>
+            <button class="add-task" onclick="openModal('backlog')">+ Add Task</button>
+        </div>
+
+        <div class="column" data-status="in-progress">
+            <div class="column-header in-progress">
+                <span>In Progress</span>
+                <span class="count" id="count-in-progress">0</span>
+            </div>
+            <div class="task-list" id="in-progress"></div>
+            <button class="add-task" onclick="openModal('in-progress')">+ Add Task</button>
+        </div>
+
+        <div class="column" data-status="blocked">
+            <div class="column-header blocked">
+                <span>Blocked</span>
+                <span class="count" id="count-blocked">0</span>
+            </div>
+            <div class="task-list" id="blocked"></div>
+            <button class="add-task" onclick="openModal('blocked')">+ Add Task</button>
+        </div>
+
+        <div class="column" data-status="done">
+            <div class="column-header done">
+                <span>Done</span>
+                <span class="count" id="count-done">0</span>
+            </div>
+            <div class="task-list" id="done"></div>
+        </div>
+    </div>
+
+    <div class="history-section">
+        <div class="history-header">Recent Activity</div>
+        <div id="history"></div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="modalHeader">Add New Task</div>
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" id="taskTitle" placeholder="What needs to be done?">
+            </div>
+            <div class="form-group">
+                <label>Tag</label>
+                <select id="taskTag">
+                    <option value="project">Project</option>
+                    <option value="research">Research</option>
+                    <option value="bug">Bug</option>
+                    <option value="feature">Feature</option>
+                    <option value="maintenance">Maintenance</option>
+                    <option value="cruise">Cruise</option>
+                </select>
+            </div>
+            <div class="form-group" id="blockedReasonGroup" style="display:none;">
+                <label>Blocked Reason</label>
+                <textarea id="blockedReason" placeholder="Why is this blocked?"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-danger" id="deleteBtn" style="display:none;" onclick="deleteTask()">Delete</button>
+                <button class="btn btn-primary" onclick="saveTask()">Save Task</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DATA_FILE = '/Users/dot/.openclaw/workspace/task-board.json';
+        let tasks = [];
+        let history = [];
+        let currentStatus = 'backlog';
+        let editingTask = null;
+        let draggedTask = null;
+        let useFileSync = false;
+
+        // Initialize
+        async function init() {
+            // Try to load from shared file first
+            await loadFromFile();
+            
+            // If file load failed, fallback to localStorage
+            if (!useFileSync) {
+                const saved = localStorage.getItem('loom-tasks');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    tasks = data.tasks || [];
+                    history = data.history || [];
+                    render();
+                }
+            }
+            
+            // Check for file updates every 3 seconds
+            setInterval(checkFileUpdates, 3000);
+        }
+
+        async function loadFromFile() {
+            try {
+                // Try multiple paths for the JSON file
+                const paths = [
+                    'task-board.json',
+                    './task-board.json',
+                    '/Users/dot/.openclaw/workspace/task-board.json',
+                    '../.openclaw/workspace/task-board.json',
+                    'file:///Users/dot/.openclaw/workspace/task-board.json'
+                ];
+                
+                for (const path of paths) {
+                    try {
+                        const r = await fetch(path);
+                        if (r.ok) {
+                            const data = await r.json();
+                            useFileSync = true;
+                            document.getElementById('syncStatus').textContent = 'Synced with task-board.json';
+                            document.getElementById('syncStatus').className = 'file-sync-status synced';
+                            
+                            // Merge file data
+                            if (data.columns) {
+                                tasks = [];
+                                Object.keys(data.columns).forEach(status => {
+                                    data.columns[status].forEach(task => {
+                                        tasks.push({...task, status});
+                                    });
+                                });
+                            }
+                            if (data.history) history = data.history;
+                            if (data.status) updateSystemStatus(data.status, data.currentTask);
+                            render();
+                            return;
+                        }
+                    } catch (e) {
+                        // Try next path
+                    }
+                }
+                throw new Error('No accessible path found');
+            } catch (err) {
+                useFileSync = false;
+                document.getElementById('syncStatus').textContent = 'Using local storage (click Import to load task-board.json)';
+            }
+        }
+
+        function checkFileUpdates() {
+            if (!useFileSync) return;
+            loadFromFile();
+        }
+
+        function saveData() {
+            // Save to localStorage
+            localStorage.setItem('loom-tasks', JSON.stringify({ tasks, history }));
+            
+            // Also export to JSON file format for Loom to read
+            const fileFormat = {
+                version: 1,
+                updatedAt: new Date().toISOString(),
+                status: document.getElementById('statusText').textContent.toLowerCase(),
+                currentTask: tasks.find(t => t.status === 'in-progress')?.title || null,
+                columns: {
+                    backlog: tasks.filter(t => t.status === 'backlog'),
+                    'in-progress': tasks.filter(t => t.status === 'in-progress'),
+                    blocked: tasks.filter(t => t.status === 'blocked'),
+                    done: tasks.filter(t => t.status === 'done')
+                },
+                history: history.slice(0, 20)
+            };
+            
+            // Create downloadable version
+            window.lastExport = fileFormat;
+        }
+
+        function render() {
+            // Clear columns
+            ['backlog', 'in-progress', 'blocked', 'done'].forEach(status => {
+                document.getElementById(status).innerHTML = '';
+                document.getElementById(`count-${status}`).textContent = 
+                    tasks.filter(t => t.status === status).length;
+            });
+
+            // Render tasks
+            tasks.forEach(task => {
+                const el = createTaskElement(task);
+                document.getElementById(task.status).appendChild(el);
+            });
+
+            // Update current task banner
+            const current = tasks.find(t => t.status === 'in-progress');
+            const banner = document.getElementById('currentTaskBanner');
+            if (current) {
+                banner.classList.add('active');
+                document.getElementById('currentTaskTitle').textContent = current.title;
+                const started = current.startedAt ? new Date(current.startedAt) : new Date();
+                const elapsed = Math.floor((Date.now() - started) / 60000);
+                document.getElementById('currentTaskTime').textContent = 
+                    `Started ${formatTime(elapsed)} ago`;
+            } else {
+                banner.classList.remove('active');
+            }
+
+            // Render history
+            const historyEl = document.getElementById('history');
+            historyEl.innerHTML = history.slice(0, 10).map(h => `
+                <div class="history-item">
+                    <span class="history-time">${formatTimestamp(h.time || h.timestamp)}</span>
+                    <span class="history-action">${h.action}</span>
+                    <span class="history-task">${h.task}</span>
+                </div>
+            `).join('');
+        }
+
+        function createTaskElement(task) {
+            const el = document.createElement('div');
+            el.className = 'task';
+            el.draggable = true;
+            el.dataset.id = task.id;
+            
+            el.innerHTML = `
+                <div class="task-title">${task.title}</div>
+                <div class="task-meta">
+                    <span class="task-tag tag-${task.tag}">${task.tag}</span>
+                    <span>${formatDate(task.createdAt)}</span>
+                </div>
+                ${task.blockedReason ? `
+                    <div class="task-blocked-reason">${task.blockedReason}</div>
+                ` : ''}
+            `;
+
+            el.addEventListener('dragstart', (e) => {
+                draggedTask = task;
+                el.classList.add('dragging');
+            });
+
+            el.addEventListener('dragend', () => {
+                el.classList.remove('dragging');
+                draggedTask = null;
+            });
+
+            el.addEventListener('dblclick', () => {
+                editTask(task);
+            });
+
+            return el;
+        }
+
+        // Drag and drop
+        document.querySelectorAll('.column').forEach(col => {
+            col.addEventListener('dragover', (e) => e.preventDefault());
+
+            col.addEventListener('drop', (e) => {
+                e.preventDefault();
+                if (!draggedTask) return;
+                
+                const newStatus = col.dataset.status;
+                if (draggedTask.status !== newStatus) {
+                    draggedTask.status = newStatus;
+                    
+                    if (newStatus === 'in-progress') {
+                        draggedTask.startedAt = Date.now();
+                        // Clear any other in-progress tasks
+                        tasks.forEach(t => {
+                            if (t.id !== draggedTask.id && t.status === 'in-progress') {
+                                t.status = 'backlog';
+                            }
+                        });
+                    }
+                    if (newStatus === 'done') {
+                        draggedTask.completedAt = Date.now();
+                    }
+                    if (newStatus !== 'blocked') {
+                        draggedTask.blockedReason = null;
+                    }
+                    
+                    addHistory(`Moved to ${newStatus}`, draggedTask.title);
+                    saveData();
+                    render();
+                }
+            });
+        });
+
+        function openModal(status) {
+            currentStatus = status;
+            editingTask = null;
+            document.getElementById('modalHeader').textContent = 'Add New Task';
+            document.getElementById('deleteBtn').style.display = 'none';
+            document.getElementById('modal').classList.add('active');
+            document.getElementById('blockedReasonGroup').style.display = 
+                status === 'blocked' ? 'block' : 'none';
+            document.getElementById('taskTitle').focus();
+        }
+
+        function editTask(task) {
+            editingTask = task;
+            document.getElementById('modalHeader').textContent = 'Edit Task';
+            document.getElementById('deleteBtn').style.display = 'block';
+            document.getElementById('taskTitle').value = task.title;
+            document.getElementById('taskTag').value = task.tag || 'project';
+            document.getElementById('blockedReason').value = task.blockedReason || '';
+            document.getElementById('blockedReasonGroup').style.display = 
+                task.status === 'blocked' ? 'block' : 'none';
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('blockedReason').value = '';
+            editingTask = null;
+        }
+
+        function saveTask() {
+            const title = document.getElementById('taskTitle').value.trim();
+            if (!title) return;
+
+            if (editingTask) {
+                editingTask.title = title;
+                editingTask.tag = document.getElementById('taskTag').value;
+                if (editingTask.status === 'blocked') {
+                    editingTask.blockedReason = document.getElementById('blockedReason').value;
+                }
+                addHistory('Updated', title);
+            } else {
+                const task = {
+                    id: Date.now().toString(),
+                    title,
+                    tag: document.getElementById('taskTag').value,
+                    status: currentStatus,
+                    createdAt: Date.now()
+                };
+
+                if (currentStatus === 'blocked') {
+                    task.blockedReason = document.getElementById('blockedReason').value;
+                    task.blockedSince = Date.now();
+                }
+                if (currentStatus === 'in-progress') {
+                    task.startedAt = Date.now();
+                }
+
+                tasks.push(task);
+                addHistory('Created', title);
+            }
+
+            saveData();
+            render();
+            closeModal();
+        }
+
+        function deleteTask() {
+            if (!editingTask) return;
+            tasks = tasks.filter(t => t.id !== editingTask.id);
+            addHistory('Deleted', editingTask.title);
+            saveData();
+            render();
+            closeModal();
+        }
+
+        function addHistory(action, taskTitle) {
+            history.unshift({
+                time: Date.now(),
+                timestamp: new Date().toISOString(),
+                action,
+                task: taskTitle
+            });
+            if (history.length > 50) history.pop();
+        }
+
+        function updateSystemStatus(status, currentTaskTitle) {
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('statusText');
+            const banner = document.getElementById('currentTaskBanner');
+            
+            dot.className = 'status-dot';
+            banner.className = 'current-task-banner';
+            
+            if (status === 'error') {
+                dot.classList.add('error');
+                text.textContent = 'Error';
+                banner.classList.add('error');
+                document.getElementById('currentTaskLabel').textContent = 'Stopped - Error';
+            } else if (status === 'paused') {
+                dot.classList.add('paused');
+                text.textContent = 'Paused';
+                banner.classList.add('paused');
+                document.getElementById('currentTaskLabel').textContent = 'Paused';
+            } else {
+                text.textContent = 'Active';
+                document.getElementById('currentTaskLabel').textContent = 'Currently Working On';
+            }
+            
+            if (currentTaskTitle) {
+                document.getElementById('currentTaskTitle').textContent = currentTaskTitle;
+            }
+        }
+
+        function exportData() {
+            const data = {
+                version: 1,
+                updatedAt: new Date().toISOString(),
+                status: document.getElementById('statusText').textContent.toLowerCase(),
+                currentTask: tasks.find(t => t.status === 'in-progress')?.title || null,
+                columns: {
+                    backlog: tasks.filter(t => t.status === 'backlog'),
+                    'in-progress': tasks.filter(t => t.status === 'in-progress'),
+                    blocked: tasks.filter(t => t.status === 'blocked'),
+                    done: tasks.filter(t => t.status === 'done')
+                },
+                history: history
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `loom-tasks-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.columns) {
+                        tasks = [];
+                        Object.keys(data.columns).forEach(status => {
+                            data.columns[status].forEach(task => {
+                                tasks.push({...task, status});
+                            });
+                        });
+                    }
+                    if (data.history) history = data.history;
+                    saveData();
+                    render();
+                    alert('Tasks imported successfully!');
+                } catch (err) {
+                    alert('Error importing file: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+            input.value = '';
+        }
+
+        function formatTime(minutes) {
+            if (minutes < 60) return `${minutes}m`;
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+        }
+
+        function formatDate(ts) {
+            const d = new Date(ts);
+            return `${d.getMonth() + 1}/${d.getDate()}`;
+        }
+
+        function formatTimestamp(ts) {
+            const d = new Date(ts);
+            return d.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
+        }
+
+        // Close modal on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Load on startup
+        init();
+
+        // Update current task timer
+        setInterval(() => {
+            const current = tasks.find(t => t.status === 'in-progress');
+            if (current && current.startedAt) {
+                const started = new Date(current.startedAt);
+                const elapsed = Math.floor((Date.now() - started) / 60000);
+                document.getElementById('currentTaskTime').textContent = 
+                    `Started ${formatTime(elapsed)} ago`;
+            }
+        }, 60000);
+    </script>
+</body>
+</html>
