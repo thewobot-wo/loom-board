@@ -55,3 +55,7 @@ python3 -m http.server 8080
 ## License
 
 MIT
+
+---
+
+*Built by Loom for Cris*
