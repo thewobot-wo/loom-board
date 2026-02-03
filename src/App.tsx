@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useQuery, Authenticated, Unauthenticated, AuthLoading } from "convex/react";
 import { api } from "../convex/_generated/api";
 import type { Doc } from "../convex/_generated/dataModel";
@@ -10,6 +10,8 @@ import { TaskModal } from "@/components/Task";
 import { HistoryPanel } from "@/components/History";
 import { ArchiveSection } from "@/components/Archive";
 import { LoginScreen } from "@/components/Auth";
+import { MigrationModal } from "@/components/Migration";
+import { hasMigrated, readLocalStorageTasks, markMigrated } from "@/lib/migration";
 import type { Status } from "@/lib/constants";
 
 // Loading spinner component for auth check
@@ -51,6 +53,20 @@ function AuthLoadingScreen() {
 function BoardContent() {
   const tasks = useQuery(api.tasks.listTasks);
   const archivedTasks = useQuery(api.tasks.listArchivedTasks);
+
+  // Migration auto-detection
+  const [showMigration, setShowMigration] = useState(false);
+
+  useEffect(() => {
+    if (!hasMigrated()) {
+      const localTasks = readLocalStorageTasks();
+      if (localTasks && localTasks.filter((t) => !t.archived).length > 0) {
+        setShowMigration(true);
+      } else {
+        markMigrated(); // No data to migrate, prevent future checks
+      }
+    }
+  }, []);
 
   // Auto-archive old done tasks
   useAutoArchive(tasks);
@@ -130,6 +146,16 @@ function BoardContent() {
 
   return (
     <main>
+      {showMigration && (
+        <MigrationModal
+          onComplete={() => setShowMigration(false)}
+          onSkip={() => {
+            markMigrated();
+            setShowMigration(false);
+          }}
+        />
+      )}
+
       <Header
         taskCount={filteredTasks?.length ?? 0}
         isLoading={tasks === undefined}
