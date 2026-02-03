@@ -26,18 +26,18 @@ Requirements for Authentication & Assistant Integration milestone. Each maps to 
 - [x] **DATA-01**: Tasks stored in Convex database (not localStorage)
 - [x] **DATA-02**: Task schema includes all existing fields (title, description, status, priority, dueDate, tag, timestamps)
 - [x] **DATA-03**: Real-time sync between Convex and UI
-- [ ] **DATA-04**: Existing localStorage data can be migrated to Convex
+- [x] **DATA-04**: Existing localStorage data can be migrated to Convex
 
 ### MCP Assistant
 
-- [ ] **MCP-01**: MCP server provides `list_tasks` tool
-- [ ] **MCP-02**: MCP server provides `get_task` tool
-- [ ] **MCP-03**: MCP server provides `create_task` tool
-- [ ] **MCP-04**: MCP server provides `update_task` tool
-- [ ] **MCP-05**: MCP server provides `move_task` tool
-- [ ] **MCP-06**: MCP server provides `delete_task` tool
-- [ ] **MCP-07**: MCP server provides `search_tasks` tool (by text, priority, tags, due date)
-- [ ] **MCP-08**: MCP server provides `get_board_summary` tool (counts, overdue, breakdown)
+- [x] **MCP-01**: MCP server provides `list_tasks` tool
+- [x] **MCP-02**: MCP server provides `get_task` tool
+- [x] **MCP-03**: MCP server provides `create_task` tool
+- [x] **MCP-04**: MCP server provides `update_task` tool
+- [x] **MCP-05**: MCP server provides `move_task` tool
+- [x] **MCP-06**: MCP server provides `delete_task` tool
+- [x] **MCP-07**: MCP server provides `search_tasks` tool (by text, priority, tags, due date)
+- [x] **MCP-08**: MCP server provides `get_board_summary` tool (counts, overdue, breakdown)
 
 ### Security
 
@@ -92,15 +92,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-01 | Phase 1 | Complete |
 | DATA-02 | Phase 1 | Complete |
 | DATA-03 | Phase 2 | Complete |
-| DATA-04 | Phase 5 | Pending |
-| MCP-01 | Phase 4 | Pending |
-| MCP-02 | Phase 4 | Pending |
-| MCP-03 | Phase 4 | Pending |
-| MCP-04 | Phase 4 | Pending |
-| MCP-05 | Phase 4 | Pending |
-| MCP-06 | Phase 4 | Pending |
-| MCP-07 | Phase 4 | Pending |
-| MCP-08 | Phase 4 | Pending |
+| DATA-04 | Phase 5 | Complete |
+| MCP-01 | Phase 4 | Complete |
+| MCP-02 | Phase 4 | Complete |
+| MCP-03 | Phase 4 | Complete |
+| MCP-04 | Phase 4 | Complete |
+| MCP-05 | Phase 4 | Complete |
+| MCP-06 | Phase 4 | Complete |
+| MCP-07 | Phase 4 | Complete |
+| MCP-08 | Phase 4 | Complete |
 | SEC-01 | Phase 3 | Complete |
 | SEC-02 | Phase 3 | Complete |
 | SEC-03 | Phase 3 | Complete |
