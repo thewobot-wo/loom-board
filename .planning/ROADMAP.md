@@ -105,10 +105,11 @@ Plans:
   1. User with existing localStorage data sees migration prompt on first authenticated login
   2. Migration imports all tasks with preserved fields and timestamps
   3. Migration handles edge cases (empty data, malformed data) gracefully
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 05-01: TBD
+- [ ] 05-01-PLAN.md — Migration data layer (localStorage utils + Convex mutation)
+- [ ] 05-02-PLAN.md — MigrationModal component and App.tsx integration
 
 ## Progress
 
@@ -121,7 +122,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 2. React Frontend | 7/7 | ✓ Complete | 2026-02-02 |
 | 3. Authentication | 4/4 | ✓ Complete | 2026-02-02 |
 | 4. MCP Integration | 5/5 | Gap closure complete | 2026-02-03 |
-| 5. Migration | 0/TBD | Not started | - |
+| 5. Migration | 0/2 | Not started | - |
 
 ## Requirement Coverage
 
