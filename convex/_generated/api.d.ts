@@ -13,6 +13,7 @@ import type * as auth from "../auth.js";
 import type * as crons from "../crons.js";
 import type * as http from "../http.js";
 import type * as mcpApi from "../mcpApi.js";
+import type * as migration from "../migration.js";
 import type * as tasks from "../tasks.js";
 import type * as users from "../users.js";
 
@@ -28,6 +29,7 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   http: typeof http;
   mcpApi: typeof mcpApi;
+  migration: typeof migration;
   tasks: typeof tasks;
   users: typeof users;
 }>;
