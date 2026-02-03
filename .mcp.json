@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "loom-board": {
+      "command": "npx",
+      "args": ["tsx", "src/mcp/index.ts"],
+      "env": {
+        "CONVEX_SITE_URL": "https://precise-monitor-542.convex.site",
+        "MCP_API_TOKEN": "e00e5a2c21e871ab11c5cc075b640f6a56c46416dbcf1b14b218731df021dad5"
+      }
+    }
+  }
+}

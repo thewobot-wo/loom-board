@@ -1,0 +1,85 @@
+.filters {
+  display: flex;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.chip {
+  padding: 6px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+  color: var(--text-secondary);
+}
+
+.chip:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--accent-blue);
+}
+
+.chip.active {
+  background: rgba(88, 166, 255, 0.1);
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+
+.clearButton {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--accent-red);
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--accent-red);
+  margin-left: auto;
+}
+
+.clearButton:hover {
+  background: rgba(248, 81, 73, 0.1);
+}
+
+.searchContainer {
+  position: relative;
+  margin-right: 16px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 200px;
+  padding: 8px 12px 8px 32px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 13px;
+  transition: var(--transition);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  width: 280px;
+}
+
+.searchInput::placeholder {
+  color: var(--text-muted);
+}

@@ -1,0 +1,224 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.modal {
+  background: var(--bg-secondary);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: var(--shadow-hover);
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.closeButton {
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 18px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.closeButton:hover {
+  opacity: 1;
+  background: var(--bg-tertiary);
+}
+
+.body {
+  padding: 20px;
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 14px;
+  transition: var(--transition);
+}
+
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+}
+
+.formGroup textarea {
+  min-height: 100px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.priorityOptions {
+  display: flex;
+  gap: 8px;
+}
+
+.priorityOption {
+  flex: 1;
+  padding: 8px;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: var(--transition);
+  background: transparent;
+}
+
+.priorityOption:hover {
+  background: var(--bg-tertiary);
+}
+
+.priorityOption.selected {
+  border-color: currentColor;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.priorityUrgent { color: var(--accent-red); }
+.priorityHigh { color: var(--accent-yellow); }
+.priorityMedium { color: var(--accent-blue); }
+.priorityLow { color: var(--text-muted); }
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-tertiary);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn:hover {
+  background: var(--border);
+  border-color: var(--text-muted);
+}
+
+.btnPrimary {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: #000;
+}
+
+.btnPrimary:hover {
+  background: #2ea043;
+  border-color: #2ea043;
+}
+
+.btnDanger {
+  background: rgba(248, 81, 73, 0.1);
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+  margin-right: auto;
+}
+
+.btnDanger:hover {
+  background: rgba(248, 81, 73, 0.2);
+}
+
+.tagsInput {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tagOption {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.tagOption:hover {
+  background: var(--bg-tertiary);
+}
+
+.tagOption.selected {
+  border-color: var(--accent-blue);
+  background: rgba(88, 166, 255, 0.1);
+  color: var(--accent-blue);
+}

@@ -1,0 +1,10 @@
+.vercel
+
+# Dependencies
+node_modules/
+
+# System files
+.DS_Store
+
+# Environment files - Keep .env.local tracked for Convex deployment URL
+# .env.local is needed for Convex connection

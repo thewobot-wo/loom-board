@@ -1,8 +1,52 @@
 {
   "name": "loom-board",
   "version": "1.0.0",
+  "type": "module",
   "description": "Loom Board - Kanban task tracker",
   "scripts": {
-    "build": "mkdir -p dist && cp index.html dist/ && cp loom-board.html dist/ && cp task-board.json dist/ 2>/dev/null || true"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext ts,tsx",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
+    "test": "vitest",
+    "test:run": "vitest run"
+  },
+  "dependencies": {
+    "@auth/core": "^0.37.4",
+    "@convex-dev/auth": "^0.0.90",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "clsx": "^2.1.1",
+    "convex": "^1.31.7",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-hotkeys-hook": "^5.2.4",
+    "sonner": "^2.0.7",
+    "@modelcontextprotocol/sdk": "^1.25.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^25.2.0",
+    "@types/react": "^19.2.10",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.3",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.0",
+    "jsdom": "^28.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.54.0",
+    "vite": "^7.3.1",
+    "vite-tsconfig-paths": "^6.0.5",
+    "vitest": "^4.0.18",
+    "tsx": "^4.19.0"
   }
 }
