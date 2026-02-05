@@ -164,12 +164,7 @@ export function Board({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div 
-        className={styles.container}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
+      <div className={styles.container}>
         {/* Desktop Grid View */}
         {!isMobile && (
           <div className={styles.board}>
@@ -194,12 +189,8 @@ export function Board({
           <>
             <div 
               className={clsx(
-                styles.mobileBoard,
-                isTransitioning && styles.transitioning
+                styles.mobileBoard
               )}
-              style={{
-                transform: `translateX(-${currentColumnIndex * 100}%)`,
-              }}
             >
               {COLUMN_ORDER.map((status) => (
                 <div 
