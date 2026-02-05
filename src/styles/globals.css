@@ -1,62 +1,45 @@
 :root {
-  /* Modern Dark Theme - Glassmorphism Edition */
+  /* Soft, Minimal Dark Theme */
   
-  /* Background Layers - subtle depth */
-  --bg-primary: #0a0c10;
-  --bg-secondary: #11141a;
-  --bg-tertiary: #1a1e27;
-  --bg-elevated: #222836;
-  --bg-glass: rgba(26, 30, 39, 0.85);
+  /* Background - subtle depth, warm undertones */
+  --bg-primary: #0d0f12;
+  --bg-secondary: #14171c;
+  --bg-tertiary: #1c2026;
+  --bg-elevated: #252a31;
   
-  /* Borders - subtle and refined */
-  --border: rgba(255, 255, 255, 0.06);
-  --border-hover: rgba(255, 255, 255, 0.12);
-  --border-active: rgba(88, 166, 255, 0.5);
+  /* Borders - barely there */
+  --border: rgba(255, 255, 255, 0.04);
+  --border-hover: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.12);
   
-  /* Text - refined hierarchy */
-  --text-primary: #f7f8fa;
-  --text-secondary: #a8b0c0;
+  /* Text - soft hierarchy */
+  --text-primary: #f0f1f3;
+  --text-secondary: #9ca3af;
   --text-muted: #6b7280;
-  --text-inverse: #0a0c10;
   
-  /* Accents - vibrant but refined */
-  --accent-blue: #3b82f6;
-  --accent-blue-glow: rgba(59, 130, 246, 0.3);
-  --accent-green: #10b981;
-  --accent-green-glow: rgba(16, 185, 129, 0.3);
-  --accent-red: #ef4444;
-  --accent-red-glow: rgba(239, 68, 68, 0.3);
-  --accent-yellow: #f59e0b;
-  --accent-yellow-glow: rgba(245, 158, 11, 0.3);
-  --accent-purple: #8b5cf6;
-  --accent-purple-glow: rgba(139, 92, 246, 0.3);
-  --accent-pink: #ec4899;
-  --accent-pink-glow: rgba(236, 72, 153, 0.3);
+  /* Accents - muted and sophisticated */
+  --accent-blue: #60a5fa;
+  --accent-green: #34d399;
+  --accent-red: #f87171;
+  --accent-yellow: #fbbf24;
+  --accent-purple: #a78bfa;
   
-  /* Active Task - special highlight */
-  --active-glow: 0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2), inset 0 0 0 1px rgba(59, 130, 246, 0.5);
-  --active-border: rgba(59, 130, 246, 0.8);
-  --active-bg: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%);
+  /* Shadows - soft and diffused */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.25);
   
-  /* Shadows - layered depth */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
-  --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.15);
-  
-  /* Radius - modern rounded corners */
+  /* Radius - soft rounded corners */
   --radius-sm: 6px;
   --radius: 10px;
   --radius-md: 14px;
   --radius-lg: 18px;
-  --radius-xl: 24px;
   --radius-full: 9999px;
   
-  /* Transitions - smooth and snappy */
-  --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Transitions */
+  --transition-fast: all 0.15s ease;
+  --transition: all 0.2s ease;
   
   /* Spacing */
   --space-1: 4px;
@@ -65,12 +48,6 @@
   --space-4: 16px;
   --space-5: 20px;
   --space-6: 24px;
-  --space-8: 32px;
-  --space-10: 40px;
-  
-  /* Typography */
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 }
 
 * {
@@ -79,12 +56,8 @@
   padding: 0;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
 body {
-  font-family: var(--font-sans);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   background: var(--bg-primary);
   color: var(--text-secondary);
   min-height: 100vh;
@@ -93,10 +66,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom Scrollbar */
+/* Subtle scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -104,101 +77,15 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--bg-elevated);
+  background: var(--border-strong);
   border-radius: var(--radius-full);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--border-hover);
+  background: var(--text-muted);
 }
 
-/* Selection */
 ::selection {
-  background: var(--accent-blue-glow);
+  background: rgba(96, 165, 250, 0.2);
   color: var(--text-primary);
 }
-
-/* Focus styles */
-:focus-visible {
-  outline: 2px solid var(--accent-blue);
-  outline-offset: 2px;
-}
-
-/* Animations */
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 5px var(--accent-blue-glow), 0 0 10px var(--accent-blue-glow);
-  }
-  50% {
-    box-shadow: 0 0 15px var(--accent-blue-glow), 0 0 25px var(--accent-blue-glow);
-  }
-}
-
-@keyframes slide-down {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* Utility classes */
-.animate-slide-down {
-  animation: slide-down 0.3s ease-out;
-}
-
-.animate-fade-in {
-  animation: fade-in 0.2s ease-out;
-}
-
-.animate-scale-in {
-  animation: scale-in 0.2s ease-out;
-}
-
-.glass {
-  background: var(--bg-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.text-gradient {
-  background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Priority colors */
-.priority-urgent { color: var(--accent-red); }
-.priority-high { color: var(--accent-yellow); }
-.priority-medium { color: var(--accent-blue); }
-.priority-low { color: var(--text-muted); }
-
-/* Status colors */
-.status-backlog { color: var(--text-muted); }
-.status-in-progress { color: var(--accent-blue); }
-.status-blocked { color: var(--accent-red); }
-.status-done { color: var(--accent-green); }
