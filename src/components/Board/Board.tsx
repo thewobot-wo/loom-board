@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import clsx from "clsx";
 import {
   DndContext,
@@ -39,17 +39,35 @@ export function Board({
   const { updateTask, deleteTask, setActiveTask, clearActiveTask } = useTaskMutations();
   const [draggingTask, setDraggingTask] = useState<Doc<"tasks"> | null>(null);
   const isMobile = useIsMobile();
+  const containerRef = useRef<HTMLDivElement>(null);
   
   // Mobile navigation
   const {
     currentColumn,
     currentColumnIndex,
     goToColumn,
-    handleTouchStart,
-    handleTouchMove,
-    handleTouchEnd,
-    isTransitioning,
+    setCurrentColumnIndex,
   } = useMobileNavigation();
+
+  // Track scroll position to update active column
+  useEffect(() => {
+    if (!isMobile || !containerRef.current) return;
+
+    const container = containerRef.current;
+    
+    const handleScroll = () => {
+      const scrollLeft = container.scrollLeft;
+      const columnWidth = container.clientWidth;
+      const newIndex = Math.round(scrollLeft / columnWidth);
+      
+      if (newIndex >= 0 && newIndex < COLUMN_ORDER.length && newIndex !== currentColumnIndex) {
+        setCurrentColumnIndex(newIndex);
+      }
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [isMobile, currentColumnIndex, setCurrentColumnIndex]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -164,7 +182,7 @@ export function Board({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className={styles.container}>
+      <div className={styles.container} ref={containerRef}>
         {/* Desktop Grid View */}
         {!isMobile && (
           <div className={styles.board}>

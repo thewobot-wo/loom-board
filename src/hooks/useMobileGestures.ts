@@ -2,12 +2,12 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { COLUMN_ORDER, type Status } from "@/lib/constants";
 
 // Haptic feedback helper
-const triggerHaptic = (type: "light" | "medium" | "heavy" | "success" = "light") => {
+export const triggerHaptic = (type: "light" | "medium" | "heavy" | "success" = "light") => {
   if (typeof navigator !== "undefined" && "vibrate" in navigator) {
     const patterns = {
       light: 10,
-      medium: 20,
-      heavy: 30,
+      medium: 25,
+      heavy: 35,
       success: [10, 50, 10],
     };
     navigator.vibrate(patterns[type] as number | number[]);
@@ -92,6 +92,7 @@ export const useMobileNavigation = () => {
   return {
     currentColumn: COLUMN_ORDER[currentColumnIndex]!,
     currentColumnIndex,
+    setCurrentColumnIndex,
     goToColumn,
     goToNextColumn,
     goToPrevColumn,
@@ -212,17 +213,34 @@ export const useCardSwipe = (
 };
 
 // Long press for context menu
+interface LongPressProps {
+  onTouchStart: (e: React.TouchEvent) => void;
+  onTouchMove: (e: React.TouchEvent) => void;
+  onTouchEnd: (e: React.TouchEvent) => void;
+  onTouchCancel: () => void;
+  onMouseDown?: (e: React.MouseEvent) => void;
+  onMouseMove?: (e: React.MouseEvent) => void;
+  onMouseUp?: (e: React.MouseEvent) => void;
+  onMouseLeave?: () => void;
+}
+
 export const useLongPress = (
   onLongPress: () => void,
   onClick: () => void,
-  duration: number = 500
-) => {
+  duration: number = 500,
+  onPressStart?: () => void,
+  onPressEnd?: () => void
+): LongPressProps => {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pressStartTime = useRef<number>(0);
   const isLongPress = useRef(false);
   const touchStartPos = useRef({ x: 0, y: 0 });
+  const hasTriggeredLongPress = useRef(false);
 
   const start = useCallback((e: React.TouchEvent | React.MouseEvent) => {
     isLongPress.current = false;
+    hasTriggeredLongPress.current = false;
+    pressStartTime.current = Date.now();
     
     if ("touches" in e && e.touches[0]) {
       touchStartPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -230,12 +248,18 @@ export const useLongPress = (
       touchStartPos.current = { x: e.clientX, y: e.clientY };
     }
 
+    // Trigger visual feedback immediately
+    onPressStart?.();
+
     timerRef.current = setTimeout(() => {
       isLongPress.current = true;
+      hasTriggeredLongPress.current = true;
       triggerHaptic("medium");
+      // End visual feedback when menu opens
+      onPressEnd?.();
       onLongPress();
     }, duration);
-  }, [onLongPress, duration]);
+  }, [onLongPress, duration, onPressStart, onPressEnd]);
 
   const move = useCallback((_e?: React.TouchEvent | React.MouseEvent) => {
     if (timerRef.current && _e && "touches" in _e) {
@@ -249,29 +273,41 @@ export const useLongPress = (
       if (deltaX > 10 || deltaY > 10) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
+        // End visual feedback on movement
+        onPressEnd?.();
       }
     }
-  }, []);
+  }, [onPressEnd]);
 
   const end = useCallback((_e?: React.TouchEvent | React.MouseEvent) => {
+    // Always end visual feedback
+    onPressEnd?.();
+
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
       
-      if (!isLongPress.current) {
-        onClick();
+      // Only trigger click if it wasn't a long press
+      if (!isLongPress.current && !hasTriggeredLongPress.current) {
+        // Check if press was short enough to be a click
+        const pressDuration = Date.now() - pressStartTime.current;
+        if (pressDuration < duration) {
+          onClick();
+        }
       }
     }
     isLongPress.current = false;
-  }, [onClick]);
+  }, [onClick, duration, onPressEnd]);
 
   const cancel = useCallback(() => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
+    // Always end visual feedback on cancel
+    onPressEnd?.();
     isLongPress.current = false;
-  }, []);
+  }, [onPressEnd]);
 
   return {
     onTouchStart: start,

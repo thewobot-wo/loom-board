@@ -4,6 +4,7 @@ import type { Doc } from "../../../convex/_generated/dataModel";
 import { TAG_COLORS, STATUS_CONFIG, type Status } from "@/lib/constants";
 import { formatDate, isOverdue, isDueSoon } from "@/lib/utils";
 import { useCardSwipe, useLongPress, useRipple, useIsMobile, getAdjacentStatus } from "@/hooks";
+import { TaskContextMenu } from "./TaskContextMenu";
 import styles from "./TaskCard.module.css";
 
 interface TaskCardProps {
@@ -27,7 +28,7 @@ function TaskCardComponent({
   const isActive = task.isActive;
   const isMobile = useIsMobile();
   const [showContextMenu, setShowContextMenu] = useState(false);
-  const [showPeek, setShowPeek] = useState(false);
+  const [isPressing, setIsPressing] = useState(false);
   
   const priorityClasses = {
     urgent: styles.priorityUrgent,
@@ -64,17 +65,40 @@ function TaskCardComponent({
     isMobile
   );
 
-  // Long press for context menu
+  // Long press for context menu (mobile only)
   const handleLongPress = useCallback(() => {
-    setShowContextMenu(true);
-    setShowPeek(true);
-  }, []);
+    if (isMobile && !swipeState.isSwiping) {
+      setIsPressing(false);
+      setShowContextMenu(true);
+    }
+  }, [isMobile, swipeState.isSwiping]);
 
   const handleClick = useCallback(() => {
-    onEdit?.(task._id);
-  }, [task._id, onEdit]);
+    // Only trigger click if not dragging and not showing context menu
+    if (!showContextMenu && !swipeState.isSwiping) {
+      onEdit?.(task._id);
+    }
+  }, [task._id, onEdit, showContextMenu, swipeState.isSwiping]);
 
-  const longPressProps = useLongPress(handleLongPress, handleClick, 400);
+  // Start pressing visual feedback
+  const handlePressStart = useCallback(() => {
+    if (isMobile && !swipeState.isSwiping) {
+      setIsPressing(true);
+    }
+  }, [isMobile, swipeState.isSwiping]);
+
+  // End pressing visual feedback
+  const handlePressEnd = useCallback(() => {
+    setIsPressing(false);
+  }, []);
+
+  const longPressProps = useLongPress(
+    handleLongPress, 
+    handleClick, 
+    500, // 500ms for long press
+    handlePressStart,
+    handlePressEnd
+  );
 
   // Ripple effect
   const { ripples, triggerRipple } = useRipple();
@@ -92,6 +116,7 @@ function TaskCardComponent({
   }, [longPressProps, cardSwipeHandleTouchMove]);
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    setIsPressing(false);
     longPressProps.onTouchEnd(e);
     cardSwipeHandleTouchEnd(e);
   }, [longPressProps, cardSwipeHandleTouchEnd]);
@@ -111,9 +136,36 @@ function TaskCardComponent({
     };
   };
 
+  // Pressing visual feedback
+  const getPressStyles = () => {
+    if (!isMobile || !isPressing || swipeState.isSwiping) return {};
+    
+    return {
+      transform: 'scale(0.98)',
+      transition: 'transform 0.15s ease',
+    };
+  };
+
   // Determine swipe action indicators
   const showLeftAction = swipeState.isSwiping && swipeState.deltaX > 50;
   const showRightAction = swipeState.isSwiping && swipeState.deltaX < -50;
+
+  // Context menu handlers
+  const handleContextMenuEdit = useCallback(() => {
+    onEdit?.(task._id);
+  }, [task._id, onEdit]);
+
+  const handleContextMenuDelete = useCallback(() => {
+    onDelete?.(task._id);
+  }, [task._id, onDelete]);
+
+  const handleContextMenuSetActive = useCallback(() => {
+    onSetActive?.(task._id);
+  }, [task._id, onSetActive]);
+
+  const handleContextMenuMove = useCallback((newStatus: Status) => {
+    onMoveTask?.(task._id, newStatus);
+  }, [task._id, onMoveTask]);
 
   return (
     <>
@@ -123,10 +175,14 @@ function TaskCardComponent({
           isDragging && styles.dragging,
           isActive && styles.active,
           isMobile && styles.mobile,
-          swipeState.isSwiping && styles.swiping
+          swipeState.isSwiping && styles.swiping,
+          isPressing && styles.pressing
         )}
         data-task-id={task._id}
-        style={getSwipeStyles()}
+        style={{
+          ...getSwipeStyles(),
+          ...getPressStyles(),
+        }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -237,133 +293,17 @@ function TaskCardComponent({
         </div>
       </div>
 
-      {/* Context Menu Modal */}
-      {showContextMenu && (
-        <div 
-          className={styles.contextMenuOverlay}
-          onClick={() => setShowContextMenu(false)}
-        >
-          <div className={styles.contextMenu} onClick={e => e.stopPropagation()}>
-            <div className={styles.contextMenuHeader}>
-              <span className={styles.contextMenuTitle}>{task.title}</span>
-              <button 
-                className={styles.contextMenuClose}
-                onClick={() => setShowContextMenu(false)}
-              >
-                ×
-              </button>
-            </div>
-            
-            <button 
-              className={styles.contextMenuItem}
-              onClick={() => {
-                onEdit?.(task._id);
-                setShowContextMenu(false);
-              }}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-              Edit
-            </button>
-
-            <button 
-              className={styles.contextMenuItem}
-              onClick={() => {
-                onSetActive?.(task._id);
-                setShowContextMenu(false);
-              }}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polygon points="5 3 19 12 5 21 5 3"/>
-              </svg>
-              {isActive ? "Deactivate" : "Set Active"}
-            </button>
-
-            {getAdjacentStatus(task.status as Status, "prev") && (
-              <button 
-                className={styles.contextMenuItem}
-                onClick={() => {
-                  handleMoveLeft();
-                  setShowContextMenu(false);
-                }}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="15 18 9 12 15 6"/>
-                </svg>
-                Move to {STATUS_CONFIG[getAdjacentStatus(task.status as Status, "prev")!]?.label}
-              </button>
-            )}
-
-            {getAdjacentStatus(task.status as Status, "next") && (
-              <button 
-                className={styles.contextMenuItem}
-                onClick={() => {
-                  handleMoveRight();
-                  setShowContextMenu(false);
-                }}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="9 18 15 12 9 6"/>
-                </svg>
-                Move to {STATUS_CONFIG[getAdjacentStatus(task.status as Status, "next")!]?.label}
-              </button>
-            )}
-
-            <div className={styles.contextMenuDivider} />
-
-            <button 
-              className={clsx(styles.contextMenuItem, styles.contextMenuItemDanger)}
-              onClick={() => {
-                onDelete?.(task._id);
-                setShowContextMenu(false);
-              }}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="3 6 5 6 21 6"/>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-              </svg>
-              Delete
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Peek Preview */}
-      {showPeek && (
-        <div 
-          className={styles.peekOverlay}
-          onClick={() => setShowPeek(false)}
-        >
-          <div className={styles.peekCard}>
-            <div className={styles.peekHeader}>
-              <span className={clsx(styles.peekPriority, priorityClass)} />
-              <span className={styles.peekStatus}>{STATUS_CONFIG[task.status as Status]?.label}</span>
-            </div>
-            <h4 className={styles.peekTitle}>{task.title}</h4>
-            
-            {task.description && (
-              <p className={styles.peekDescription}>{task.description}</p>
-            )}
-            
-            <div className={styles.peekFooter}>
-              {task.tags.length > 0 && (
-                <div className={styles.peekTags}>
-                  {task.tags.map(tag => (
-                    <span key={tag} className={styles.peekTag}>#{tag}</span>
-                  ))}
-                </div>
-              )}
-              
-              {task.dueDate && (
-                <span className={styles.peekDueDate}>
-                  Due: {formatDate(task.dueDate)}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
+      {/* Context Menu - Mobile Only */}
+      {isMobile && (
+        <TaskContextMenu
+          task={task}
+          isOpen={showContextMenu}
+          onClose={() => setShowContextMenu(false)}
+          onEdit={handleContextMenuEdit}
+          onDelete={handleContextMenuDelete}
+          onSetActive={handleContextMenuSetActive}
+          onMoveTask={handleContextMenuMove}
+        />
       )}
     </>
   );

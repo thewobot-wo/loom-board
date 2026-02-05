@@ -1,7 +1,9 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { Doc, Id } from "../../../convex/_generated/dataModel";
+import { useMemo } from "react";
+import type { Doc } from "../../../convex/_generated/dataModel";
 import type { Status } from "@/lib/constants";
+import { useIsMobile } from "@/hooks";
 import { TaskCard } from "./TaskCard";
 import styles from "./TaskCard.module.css";
 
@@ -20,6 +22,8 @@ export function SortableTaskCard({
   onSetActive, 
   onMoveTask 
 }: SortableTaskCardProps) {
+  const isMobile = useIsMobile();
+  
   const {
     attributes,
     listeners,
@@ -27,22 +31,29 @@ export function SortableTaskCard({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: task._id });
+  } = useSortable({ 
+    id: task._id,
+    // Disable drag on mobile to allow swipe gestures and long press
+    disabled: isMobile,
+  });
 
-  const style = {
+  const style = useMemo(() => ({
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
     zIndex: isDragging ? 1000 : 1,
-  };
+    // Disable pointer events on the wrapper when dragging
+    pointerEvents: isDragging ? "none" as const : "auto" as const,
+  }), [transform, transition, isDragging]);
 
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={isDragging ? styles.dragging : undefined}
-      {...attributes}
-      {...listeners}
+      // Only spread drag attributes/listeners on desktop
+      {...(!isMobile ? attributes : {})}
+      {...(!isMobile ? listeners : {})}
     >
       <TaskCard 
         task={task} 
