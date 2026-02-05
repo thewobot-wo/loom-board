@@ -45,5 +45,61 @@
 }
 
 .dragOverlay {
-  box-shadow: var(--shadow-lg);
+  background: rgba(250, 248, 245, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  box-shadow: 
+    0 0 0 1px rgba(90, 154, 232, 0.15),
+    0 25px 50px -12px rgba(45, 40, 36, 0.25),
+    0 12px 24px -8px rgba(45, 40, 36, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px) saturate(180%);
+  transform: scale(1.02) rotate(-1deg);
+  opacity: 0.95;
+  cursor: grabbing;
+  animation: dragLift 0.2s ease-out;
+}
+
+@keyframes dragLift {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.02) rotate(-1deg);
+    opacity: 0.95;
+  }
+}
+
+.dragOverlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--chroma-blue) 0%,
+    rgba(90, 154, 232, 0.5) 50%,
+    transparent 100%
+  );
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  opacity: 0.6;
+}
+
+.dragOverlay::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 5%;
+  right: 5%;
+  height: 12px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(45, 40, 36, 0.15) 0%,
+    transparent 70%
+  );
+  filter: blur(8px);
 }

@@ -34,7 +34,7 @@ export function Header({ taskCount, isLoading, onShowHistory }: HeaderProps) {
 
   return (
     <>
-      <header className={styles.header}>
+      <header className={styles.header} data-active-task={!!activeTask}>
         <div className={styles.content}>
           <div className={styles.left}>
             <div className={styles.brand}>
@@ -49,6 +49,13 @@ export function Header({ taskCount, isLoading, onShowHistory }: HeaderProps) {
                 <span className={styles.subtitle}>Chromolume #7</span>
               </div>
             </div>
+            {activeTask && (
+              <div className={styles.activeTaskIndicator}>
+                <div className={styles.activeTaskPulse} />
+                <span className={styles.activeTaskLabel}>Currently working on</span>
+                <span className={styles.activeTaskTitle}>{activeTask.title}</span>
+              </div>
+            )}
           </div>
           <div className={styles.right}>
             <button className={styles.btn} onClick={onShowHistory}>
@@ -79,19 +86,6 @@ export function Header({ taskCount, isLoading, onShowHistory }: HeaderProps) {
           </div>
         </div>
       </header>
-
-      {activeTask && (
-        <div className={styles.activeTaskBanner}>
-          <div className={styles.activeTaskContent}>
-            <div className={styles.activeIndicator} />
-            <span className={styles.activeTaskLabel}>Currently Working On</span>
-            <span className={styles.activeTaskTitle}>{activeTask.title}</span>
-            <span className={`${styles.priorityBadge} ${styles[`priority_${activeTask.priority}`]}`}>
-              {activeTask.priority.toUpperCase()}
-            </span>
-          </div>
-        </div>
-      )}
     </>
   );
 }

@@ -6,6 +6,12 @@
   top: 0;
   z-index: 50;
   box-shadow: var(--shadow-sm);
+  border-left: 3px solid transparent;
+  transition: border-color 0.3s ease;
+}
+
+.header[data-active-task="true"] {
+  border-left-color: var(--chroma-blue);
 }
 
 .content {
@@ -20,6 +26,7 @@
 .left {
   display: flex;
   align-items: center;
+  gap: var(--space-4);
 }
 
 .brand {
@@ -56,6 +63,57 @@
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+
+/* Active Task Indicator - Inline with header */
+.activeTaskIndicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--chroma-blue-muted);
+  border-radius: var(--radius);
+  border: 1px solid rgba(90, 154, 232, 0.2);
+  margin-left: var(--space-4);
+  max-width: 400px;
+}
+
+.activeTaskPulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--chroma-blue);
+  flex-shrink: 0;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(90, 154, 232, 0.4);
+  }
+  50% { 
+    opacity: 0.8;
+    box-shadow: 0 0 0 4px rgba(90, 154, 232, 0);
+  }
+}
+
+.activeTaskLabel {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--chroma-blue);
+  flex-shrink: 0;
+}
+
+.activeTaskTitle {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .right {
@@ -168,80 +226,10 @@
   height: 16px;
 }
 
-/* Active Task Banner */
-.activeTaskBanner {
-  background: var(--chroma-blue-muted);
-  border-bottom: 1px solid var(--chroma-blue);
-}
-
-.activeTaskContent {
-  max-width: 1800px;
-  margin: 0 auto;
-  padding: var(--space-3) var(--space-5);
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.activeIndicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--chroma-blue);
-  flex-shrink: 0;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-.activeTaskLabel {
-  font-size: var(--text-xs);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--chroma-blue);
-  flex-shrink: 0;
-}
-
-.activeTaskTitle {
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--text-primary);
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.priorityBadge {
-  font-size: var(--text-xs);
-  font-weight: 600;
-  text-transform: uppercase;
-  padding: 2px 8px;
-  border-radius: var(--radius-sm);
-}
-
-.priority_urgent {
-  background: var(--chroma-red-muted);
-  color: var(--chroma-red);
-}
-
-.priority_high {
-  background: var(--chroma-orange-muted);
-  color: var(--chroma-orange);
-}
-
-.priority_medium {
-  background: var(--chroma-blue-muted);
-  color: var(--chroma-blue);
-}
-
-.priority_low {
-  background: rgba(138, 125, 112, 0.15);
-  color: var(--text-tertiary);
+@media (max-width: 900px) {
+  .activeTaskIndicator {
+    display: none;
+  }
 }
 
 @media (max-width: 768px) {
@@ -264,9 +252,5 @@
   
   .userName {
     display: none;
-  }
-  
-  .activeTaskContent {
-    padding: var(--space-3) var(--space-4);
   }
 }

@@ -106,13 +106,49 @@ export function Column({ status, tasks, onAddTask, onEditTask }: ColumnProps) {
         {/* Empty state */}
         {tasks.length === 0 && (
           <div className={styles.emptyState}>
-            {status === "done"
-              ? "No completed tasks yet"
-              : status === "backlog"
-              ? "Ready to plan something new?"
-              : status === "blocked"
-              ? "Nothing blocked — smooth sailing!"
-              : "Drag tasks here to start"}
+            <div className={styles.emptyStateCard}>
+              <div className={styles.emptyStateIcon} style={{ color: config.color }}>
+                {status === "done" && (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                )}
+                {status === "backlog" && (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                  </svg>
+                )}
+                {status === "blocked" && (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                  </svg>
+                )}
+                {status === "in_progress" && (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                    <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                )}
+              </div>
+              <p className={styles.emptyStateText}>
+                {status === "done"
+                  ? "No completed tasks yet"
+                  : status === "backlog"
+                  ? "Ready to plan something new?"
+                  : status === "blocked"
+                  ? "Nothing blocked — smooth sailing!"
+                  : "Drag tasks here to start"}
+              </p>
+              <div className={styles.emptyStateHint}>
+                {status === "done"
+                  ? "Finished tasks will appear here"
+                  : status === "backlog"
+                  ? "Click + Add Task to begin"
+                  : status === "blocked"
+                  ? "All clear for now"
+                  : "Or click + Add Task"}
+              </div>
+            </div>
           </div>
         )}
       </div>
