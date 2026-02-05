@@ -34,11 +34,11 @@
   --seurat-shadow: #7a7a8a;
   --seurat-shadow-muted: rgba(122, 122, 138, 0.15);
   
-  /* Clothing accents */
+  /* Clothing accents - P1 more yellow */
   --seurat-red: #b85046;
   --seurat-red-muted: rgba(184, 80, 70, 0.12);
-  --seurat-orange: #b87a4e;
-  --seurat-orange-muted: rgba(184, 122, 78, 0.12);
+  --seurat-orange: #d4a848;
+  --seurat-orange-muted: rgba(212, 168, 72, 0.12);
   
   /* Status */
   --status-backlog: var(--seurat-shadow);
