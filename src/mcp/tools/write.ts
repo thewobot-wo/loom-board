@@ -44,13 +44,6 @@ const STATUS_LABELS: Record<string, string> = {
   done: "Done",
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  backlog: "Backlog",
-  in_progress: "In Progress",
-  blocked: "Blocked",
-  done: "Done",
-};
-
 function formatPriority(priority: string): string {
   return priority.toUpperCase();
 }
