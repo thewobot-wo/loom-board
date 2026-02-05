@@ -5,6 +5,7 @@
   position: sticky;
   top: 0;
   z-index: 50;
+  box-shadow: var(--shadow-sm);
 }
 
 .content {
@@ -156,7 +157,7 @@
   height: 16px;
 }
 
-/* Active Task Banner - like a figure by the water */
+/* Active Task Banner */
 .activeTaskBanner {
   background: var(--seurat-water-muted);
   border-bottom: 1px solid var(--seurat-water);

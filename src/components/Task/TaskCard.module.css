@@ -6,11 +6,13 @@
   cursor: grab;
   transition: var(--transition);
   position: relative;
+  box-shadow: var(--shadow);
 }
 
 .card:hover {
   border-color: var(--seurat-grass);
   box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 .card:active {
@@ -18,16 +20,16 @@
 }
 
 .card.dragging {
-  opacity: 0.5;
+  opacity: 0.6;
   box-shadow: var(--shadow-lg);
 }
 
 .card.active {
   border-color: var(--seurat-water);
-  background: var(--seurat-water-muted);
+  box-shadow: 0 0 0 3px var(--seurat-water-muted), var(--shadow-md);
 }
 
-/* Priority indicator - Seurat's pointillist dots */
+/* Priority indicator - subtle left border */
 .priorityIndicator {
   position: absolute;
   left: 0;
@@ -61,7 +63,7 @@
   flex: 1;
 }
 
-/* Active indicator - a dappled dot */
+/* Active indicator */
 .activeIndicator {
   width: 6px;
   height: 6px;
@@ -128,7 +130,6 @@
   gap: var(--space-2);
 }
 
-/* Tags with Seurat colors */
 .tag {
   font-size: var(--text-xs);
   font-weight: 500;
@@ -146,12 +147,6 @@
   content: '#';
   opacity: 0.4;
 }
-
-/* Different tag colors */
-.tag[data-tag="project"] { color: var(--seurat-water); }
-.tag[data-tag="design"] { color: var(--seurat-grass); }
-.tag[data-tag="loom-board"] { color: var(--seurat-orange); }
-.tag[data-tag="feature"] { color: var(--seurat-shadow); }
 
 .dueDate {
   font-size: var(--text-xs);
@@ -181,6 +176,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: var(--space-4);
+  box-shadow: var(--shadow);
   animation: skeleton-pulse 1.5s infinite;
 }
 

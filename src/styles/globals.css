@@ -1,45 +1,44 @@
 :root {
-  /* === SEURAT-INSPIRED: A SUNDAY AFTERNOON === */
-  /* Light theme as default - warm afternoon light */
+  /* === SEURAT-INSPIRED: WARMER, TEXTURED === */
   
-  /* Background - grass, canvas, warm light */
-  --bg-canvas: #f8f6f1;
-  --bg-primary: #fdfcfa;
-  --bg-secondary: #f5f3ed;
-  --bg-tertiary: #ebe8e0;
-  --bg-hover: #f0ede6;
+  /* Background - aged canvas, warm ochre undertones */
+  --bg-canvas: #f0ebe3;
+  --bg-primary: #faf8f5;
+  --bg-secondary: #f5f2ed;
+  --bg-tertiary: #ebe6de;
+  --bg-hover: #f2ede6;
   
-  /* Borders - soft like afternoon shadows */
-  --border: rgba(60, 60, 60, 0.08);
-  --border-strong: rgba(60, 60, 60, 0.12);
-  --border-hover: rgba(60, 60, 60, 0.2);
+  /* Borders - warmer shadows */
+  --border: rgba(100, 80, 60, 0.1);
+  --border-strong: rgba(100, 80, 60, 0.16);
+  --border-hover: rgba(100, 80, 60, 0.24);
   
-  /* Text - soft charcoal */
-  --text-primary: #2d2d2d;
-  --text-secondary: #5a5a5a;
-  --text-tertiary: #888888;
-  --text-muted: #aaaaaa;
+  /* Text - warm charcoal */
+  --text-primary: #2a2420;
+  --text-secondary: #5c5248;
+  --text-tertiary: #8a7d6e;
+  --text-muted: #a89a89;
   
-  /* === SEURAT COLORS === */
+  /* === SEURAT COLORS - slightly muted for warmth === */
   /* Grass and foliage */
-  --seurat-grass: #7a9a5b;
-  --seurat-grass-light: #a8b876;
-  --seurat-grass-muted: rgba(122, 154, 91, 0.12);
+  --seurat-grass: #6b8a52;
+  --seurat-grass-light: #9ab06a;
+  --seurat-grass-muted: rgba(107, 138, 82, 0.15);
   
   /* Water and sky */
-  --seurat-water: #6b9eb8;
-  --seurat-water-light: #9bbad1;
-  --seurat-water-muted: rgba(107, 158, 184, 0.12);
+  --seurat-water: #5a8aa0;
+  --seurat-water-light: #8ab0c4;
+  --seurat-water-muted: rgba(90, 138, 160, 0.15);
   
   /* Shadow purples */
   --seurat-shadow: #7a7a8a;
-  --seurat-shadow-muted: rgba(122, 122, 138, 0.12);
+  --seurat-shadow-muted: rgba(122, 122, 138, 0.15);
   
   /* Clothing accents */
-  --seurat-red: #c45a50;
-  --seurat-red-muted: rgba(196, 90, 80, 0.1);
-  --seurat-orange: #c9875a;
-  --seurat-orange-muted: rgba(201, 135, 90, 0.1);
+  --seurat-red: #b85046;
+  --seurat-red-muted: rgba(184, 80, 70, 0.12);
+  --seurat-orange: #b87a4e;
+  --seurat-orange-muted: rgba(184, 122, 78, 0.12);
   
   /* Status */
   --status-backlog: var(--seurat-shadow);
@@ -53,11 +52,11 @@
   --priority-normal: var(--seurat-water);
   --priority-low: var(--seurat-shadow);
   
-  /* Shadows - soft afternoon */
-  --shadow-sm: 0 1px 2px rgba(45, 45, 45, 0.04);
-  --shadow: 0 1px 3px rgba(45, 45, 45, 0.06);
-  --shadow-md: 0 4px 12px rgba(45, 45, 45, 0.08);
-  --shadow-lg: 0 8px 24px rgba(45, 45, 45, 0.1);
+  /* Shadows - warmer, softer */
+  --shadow-sm: 0 1px 2px rgba(60, 50, 40, 0.06);
+  --shadow: 0 2px 4px rgba(60, 50, 40, 0.08);
+  --shadow-md: 0 4px 12px rgba(60, 50, 40, 0.1);
+  --shadow-lg: 0 8px 24px rgba(60, 50, 40, 0.12);
   
   /* Radius */
   --radius-sm: 4px;
@@ -102,6 +101,37 @@ body {
   min-height: 100vh;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+
+/* Pointillist texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(180, 160, 130, 0.08) 1px, transparent 1px),
+    radial-gradient(circle at 60% 20%, rgba(160, 140, 120, 0.06) 1px, transparent 1px),
+    radial-gradient(circle at 80% 60%, rgba(170, 150, 130, 0.07) 1px, transparent 1px),
+    radial-gradient(circle at 40% 80%, rgba(150, 140, 120, 0.05) 1px, transparent 1px),
+    radial-gradient(circle at 10% 70%, rgba(160, 150, 130, 0.06) 1px, transparent 1px),
+    radial-gradient(circle at 90% 40%, rgba(180, 160, 140, 0.05) 1px, transparent 1px),
+    radial-gradient(circle at 30% 50%, rgba(140, 130, 110, 0.04) 1px, transparent 1px),
+    radial-gradient(circle at 70% 90%, rgba(170, 160, 140, 0.05) 1px, transparent 1px);
+  background-size: 
+    60px 60px,
+    80px 80px,
+    50px 50px,
+    70px 70px,
+    90px 90px,
+    55px 55px,
+    75px 75px,
+    65px 65px;
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* Invisible scrollbar */
