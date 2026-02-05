@@ -25,6 +25,19 @@
     width: 100vw;
     max-width: 100vw;
   }
+  
+  /* Enable horizontal scroll with snap as fallback */
+  .container:has(.mobileBoard) {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .container:has(.mobileBoard)::-webkit-scrollbar {
+    display: none;
+  }
 
   .board {
     display: none; /* Hide desktop grid on mobile */
@@ -132,6 +145,8 @@
   transition: opacity 0.3s ease, transform 0.3s ease;
   box-sizing: border-box;
   position: relative;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
 }
 
 .mobileColumn.activeColumn {
