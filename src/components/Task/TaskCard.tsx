@@ -26,11 +26,12 @@ function TaskCardComponent({ task, isDragging, onEdit }: TaskCardProps) {
   return (
     <div
       className={clsx(
-        styles.card, 
+        styles.card,
         isDragging && styles.dragging,
         isActive && styles.active
       )}
       data-task-id={task._id}
+      onClick={() => onEdit?.(task._id)}
     >
       {/* Soft gradient priority indicator */}
       <div className={clsx(styles.priorityIndicator, priorityClass)} />
