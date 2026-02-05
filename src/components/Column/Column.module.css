@@ -19,7 +19,6 @@
   gap: var(--space-2);
 }
 
-/* Status indicator - subtle ring */
 .icon {
   width: 8px;
   height: 8px;
@@ -36,10 +35,10 @@
   opacity: 0.3;
 }
 
-.icon[data-status="backlog"] { background: var(--seurat-shadow); color: var(--seurat-shadow); }
-.icon[data-status="in_progress"] { background: var(--seurat-water); color: var(--seurat-water); }
-.icon[data-status="blocked"] { background: var(--seurat-red); color: var(--seurat-red); }
-.icon[data-status="done"] { background: var(--seurat-grass); color: var(--seurat-grass); }
+.icon[data-status="backlog"] { background: var(--text-tertiary); color: var(--text-tertiary); }
+.icon[data-status="in_progress"] { background: var(--chroma-blue); color: var(--chroma-blue); }
+.icon[data-status="blocked"] { background: var(--chroma-red); color: var(--chroma-red); }
+.icon[data-status="done"] { background: var(--chroma-green); color: var(--chroma-green); }
 
 .title {
   font-size: var(--text-xs);
@@ -56,7 +55,6 @@
   margin-left: auto;
 }
 
-/* Progress bar */
 .progressBar {
   height: 2px;
   background: var(--border);
@@ -71,12 +69,11 @@
   transition: width 0.3s ease;
 }
 
-.progressFill[data-status="backlog"] { background: var(--seurat-shadow); }
-.progressFill[data-status="in_progress"] { background: var(--seurat-water); }
-.progressFill[data-status="blocked"] { background: var(--seurat-red); }
-.progressFill[data-status="done"] { background: var(--seurat-grass); }
+.progressFill[data-status="backlog"] { background: var(--text-tertiary); }
+.progressFill[data-status="in_progress"] { background: var(--chroma-blue); }
+.progressFill[data-status="blocked"] { background: var(--chroma-red); }
+.progressFill[data-status="done"] { background: var(--chroma-green); }
 
-/* Priority breakdown */
 .priorityBreakdown {
   display: flex;
   gap: var(--space-1);
@@ -89,10 +86,10 @@
   border-radius: 50%;
 }
 
-.priorityUrgent { background: var(--seurat-red); }
-.priorityHigh { background: var(--seurat-orange); }
-.priorityMedium { background: var(--seurat-water); }
-.priorityLow { background: var(--seurat-shadow); }
+.priorityUrgent { background: var(--chroma-red); }
+.priorityHigh { background: var(--chroma-orange); }
+.priorityMedium { background: var(--chroma-blue); }
+.priorityLow { background: var(--text-tertiary); }
 
 .taskList {
   flex: 1;
@@ -117,11 +114,10 @@
 }
 
 .dragOver {
-  background: var(--seurat-grass-muted);
+  background: var(--chroma-green-muted);
   border-radius: var(--radius);
 }
 
-/* Add button */
 .addButton {
   margin-top: var(--space-2);
   padding: var(--space-3) var(--space-2);
@@ -139,11 +135,10 @@
 }
 
 .addButton:hover {
-  background: var(--seurat-grass-muted);
-  color: var(--seurat-grass);
+  background: var(--chroma-green-muted);
+  color: var(--chroma-green);
 }
 
-/* Empty state */
 .emptyState {
   text-align: center;
   padding: var(--space-6) var(--space-4);
@@ -151,7 +146,6 @@
   font-size: var(--text-sm);
 }
 
-/* Skeleton */
 .skeleton {
   animation: skeleton-pulse 1.5s infinite;
 }

@@ -1,62 +1,67 @@
 :root {
-  /* === SEURAT-INSPIRED: WARMER, TEXTURED === */
+  /* === CHROMOLUME #7: COLOR AND LIGHT === */
+  /* Based on the logo - primary colors creating harmony */
   
-  /* Background - darker aged canvas, richer ochre */
-  --bg-canvas: #e8e0d6;
-  --bg-primary: #f5f2ed;
-  --bg-secondary: #ebe6de;
-  --bg-tertiary: #e0d9ce;
-  --bg-hover: #e5ded3;
+  /* Background - warm paper tone */
+  --bg-canvas: #f5f0e8;
+  --bg-primary: #faf8f5;
+  --bg-secondary: #f0ebe3;
+  --bg-tertiary: #e8e0d6;
+  --bg-hover: #ede6dc;
   
-  /* Borders - warmer shadows */
-  --border: rgba(100, 80, 60, 0.1);
-  --border-strong: rgba(100, 80, 60, 0.16);
-  --border-hover: rgba(100, 80, 60, 0.24);
+  /* Borders - warm neutrals */
+  --border: rgba(100, 90, 80, 0.08);
+  --border-strong: rgba(100, 90, 80, 0.14);
+  --border-hover: rgba(100, 90, 80, 0.22);
   
   /* Text - warm charcoal */
-  --text-primary: #2a2420;
-  --text-secondary: #5c5248;
-  --text-tertiary: #8a7d6e;
+  --text-primary: #2d2824;
+  --text-secondary: #5a5248;
+  --text-tertiary: #8a7d70;
   --text-muted: #a89a89;
   
-  /* === SEURAT COLORS - slightly muted for warmth === */
-  /* Grass and foliage */
-  --seurat-grass: #6b8a52;
-  --seurat-grass-light: #9ab06a;
-  --seurat-grass-muted: rgba(107, 138, 82, 0.15);
+  /* === LOGO COLORS === */
+  /* Primary red - top circle */
+  --chroma-red: #e85a5a;
+  --chroma-red-muted: rgba(232, 90, 90, 0.12);
   
-  /* Water and sky */
-  --seurat-water: #5a8aa0;
-  --seurat-water-light: #8ab0c4;
-  --seurat-water-muted: rgba(90, 138, 160, 0.15);
+  /* Primary blue - left circle */
+  --chroma-blue: #5a9ae8;
+  --chroma-blue-muted: rgba(90, 154, 232, 0.12);
   
-  /* Shadow purples */
-  --seurat-shadow: #7a7a8a;
-  --seurat-shadow-muted: rgba(122, 122, 138, 0.15);
+  /* Primary yellow - right circle */
+  --chroma-yellow: #e8d15a;
+  --chroma-yellow-muted: rgba(232, 209, 90, 0.12);
   
-  /* Clothing accents - P1 more yellow */
-  --seurat-red: #b85046;
-  --seurat-red-muted: rgba(184, 80, 70, 0.12);
-  --seurat-orange: #d4a848;
-  --seurat-orange-muted: rgba(212, 168, 72, 0.12);
+  /* Secondary green - overlap */
+  --chroma-green: #5ac85a;
+  --chroma-green-muted: rgba(90, 200, 90, 0.12);
   
-  /* Status */
-  --status-backlog: var(--seurat-shadow);
-  --status-progress: var(--seurat-water);
-  --status-blocked: var(--seurat-red);
-  --status-done: var(--seurat-grass);
+  /* Secondary purple - overlap */
+  --chroma-purple: #7a5ae8;
+  --chroma-purple-muted: rgba(122, 90, 232, 0.12);
   
-  /* Priority */
-  --priority-urgent: var(--seurat-red);
-  --priority-high: var(--seurat-orange);
-  --priority-normal: var(--seurat-water);
-  --priority-low: var(--seurat-shadow);
+  /* Secondary orange - overlap */
+  --chroma-orange: #e8a05a;
+  --chroma-orange-muted: rgba(232, 160, 90, 0.12);
   
-  /* Shadows - warmer, softer */
-  --shadow-sm: 0 1px 2px rgba(60, 50, 40, 0.06);
-  --shadow: 0 2px 4px rgba(60, 50, 40, 0.08);
-  --shadow-md: 0 4px 12px rgba(60, 50, 40, 0.1);
-  --shadow-lg: 0 8px 24px rgba(60, 50, 40, 0.12);
+  /* Status - using logo primaries */
+  --status-backlog: var(--text-tertiary);
+  --status-progress: var(--chroma-blue);
+  --status-blocked: var(--chroma-red);
+  --status-done: var(--chroma-green);
+  
+  /* Priority - chromatic scale */
+  --priority-urgent: var(--chroma-red);
+  --priority-high: var(--chroma-orange);
+  --priority-normal: var(--chroma-blue);
+  --priority-low: var(--text-tertiary);
+  
+  /* Shadows - warm */
+  --shadow-sm: 0 1px 2px rgba(45, 40, 36, 0.04);
+  --shadow: 0 2px 4px rgba(45, 40, 36, 0.06);
+  --shadow-md: 0 4px 12px rgba(45, 40, 36, 0.08);
+  --shadow-lg: 0 8px 24px rgba(45, 40, 36, 0.1);
   
   /* Radius */
   --radius-sm: 4px;
@@ -104,7 +109,7 @@ body {
   position: relative;
 }
 
-/* Pointillist texture overlay - very subtle */
+/* Pointillist texture overlay */
 body::before {
   content: '';
   position: fixed;
@@ -113,12 +118,12 @@ body::before {
   right: 0;
   bottom: 0;
   background-image: 
-    radial-gradient(circle at 15% 25%, rgba(100, 85, 70, 0.06) 1.5px, transparent 1.5px),
-    radial-gradient(circle at 55% 15%, rgba(90, 80, 70, 0.05) 1.5px, transparent 1.5px),
-    radial-gradient(circle at 85% 55%, rgba(95, 85, 75, 0.05) 1.5px, transparent 1.5px),
-    radial-gradient(circle at 35% 75%, rgba(85, 78, 68, 0.04) 1.5px, transparent 1.5px),
-    radial-gradient(circle at 75% 85%, rgba(90, 82, 72, 0.05) 1.5px, transparent 1.5px),
-    radial-gradient(circle at 25% 55%, rgba(88, 80, 70, 0.04) 1.5px, transparent 1.5px);
+    radial-gradient(circle at 15% 25%, rgba(90, 80, 70, 0.05) 1.5px, transparent 1.5px),
+    radial-gradient(circle at 55% 15%, rgba(80, 75, 65, 0.04) 1.5px, transparent 1.5px),
+    radial-gradient(circle at 85% 55%, rgba(85, 78, 70, 0.04) 1.5px, transparent 1.5px),
+    radial-gradient(circle at 35% 75%, rgba(75, 70, 62, 0.03) 1.5px, transparent 1.5px),
+    radial-gradient(circle at 75% 85%, rgba(80, 75, 68, 0.04) 1.5px, transparent 1.5px),
+    radial-gradient(circle at 25% 55%, rgba(78, 72, 65, 0.03) 1.5px, transparent 1.5px);
   background-size: 
     80px 80px,
     100px 100px,
@@ -146,5 +151,5 @@ body::before {
 }
 
 ::selection {
-  background: var(--seurat-water-muted);
+  background: var(--chroma-blue-muted);
 }
