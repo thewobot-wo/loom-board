@@ -104,7 +104,7 @@ body {
   position: relative;
 }
 
-/* Pointillist texture overlay - more visible */
+/* Pointillist texture overlay - very subtle */
 body::before {
   content: '';
   position: fixed;
@@ -113,30 +113,19 @@ body::before {
   right: 0;
   bottom: 0;
   background-image: 
-    radial-gradient(circle at 15% 25%, rgba(120, 100, 80, 0.15) 2px, transparent 2px),
-    radial-gradient(circle at 55% 15%, rgba(100, 90, 75, 0.12) 2px, transparent 2px),
-    radial-gradient(circle at 85% 55%, rgba(110, 100, 85, 0.14) 2px, transparent 2px),
-    radial-gradient(circle at 35% 75%, rgba(90, 85, 70, 0.10) 2px, transparent 2px),
-    radial-gradient(circle at 75% 85%, rgba(105, 95, 80, 0.13) 2px, transparent 2px),
-    radial-gradient(circle at 25% 55%, rgba(95, 88, 75, 0.11) 2px, transparent 2px),
-    radial-gradient(circle at 65% 35%, rgba(115, 105, 90, 0.12) 2px, transparent 2px),
-    radial-gradient(circle at 45% 45%, rgba(85, 80, 70, 0.10) 2px, transparent 2px),
-    /* Smaller dots for finer texture */
-    radial-gradient(circle at 10% 60%, rgba(100, 90, 80, 0.08) 1px, transparent 1px),
-    radial-gradient(circle at 90% 30%, rgba(95, 85, 75, 0.09) 1px, transparent 1px),
-    radial-gradient(circle at 50% 90%, rgba(105, 95, 85, 0.07) 1px, transparent 1px);
+    radial-gradient(circle at 15% 25%, rgba(100, 85, 70, 0.06) 1.5px, transparent 1.5px),
+    radial-gradient(circle at 55% 15%, rgba(90, 80, 70, 0.05) 1.5px, transparent 1.5px),
+    radial-gradient(circle at 85% 55%, rgba(95, 85, 75, 0.05) 1.5px, transparent 1.5px),
+    radial-gradient(circle at 35% 75%, rgba(85, 78, 68, 0.04) 1.5px, transparent 1.5px),
+    radial-gradient(circle at 75% 85%, rgba(90, 82, 72, 0.05) 1.5px, transparent 1.5px),
+    radial-gradient(circle at 25% 55%, rgba(88, 80, 70, 0.04) 1.5px, transparent 1.5px);
   background-size: 
-    50px 50px,
-    70px 70px,
-    40px 40px,
-    60px 60px,
     80px 80px,
-    45px 45px,
-    65px 65px,
-    55px 55px,
-    30px 30px,
-    35px 35px,
-    25px 25px;
+    100px 100px,
+    70px 70px,
+    90px 90px,
+    110px 110px,
+    75px 75px;
   pointer-events: none;
   z-index: 0;
 }
