@@ -22,6 +22,7 @@ interface TaskData {
   dueDateTimestamp: number | null;
   order: number;
   archived: boolean;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -73,7 +74,8 @@ function formatPriority(priority: string): string {
 
 function formatTaskLine(task: TaskData): string {
   const parts: string[] = [];
-  parts.push(`[${formatPriority(task.priority)}] ${task.title} (ID: ${task.id})`);
+  const activeIndicator = task.isActive ? "🔥 " : "";
+  parts.push(`${activeIndicator}[${formatPriority(task.priority)}] ${task.title} (ID: ${task.id})`);
 
   const details: string[] = [];
   details.push(`Status: ${STATUS_LABELS[task.status] ?? task.status}`);
@@ -82,6 +84,9 @@ function formatTaskLine(task: TaskData): string {
   }
   if (task.tags.length > 0) {
     details.push(`Tags: ${task.tags.join(", ")}`);
+  }
+  if (task.isActive) {
+    details.push("✨ CURRENTLY ACTIVE");
   }
   parts.push(`  ${details.join(" | ")}`);
 
@@ -94,6 +99,7 @@ function formatTaskDetail(task: TaskData): string {
     `ID: ${task.id}`,
     `Status: ${STATUS_LABELS[task.status] ?? task.status}`,
     `Priority: ${formatPriority(task.priority)}`,
+    `Active: ${task.isActive ? "🔥 YES - Currently working on this!" : "No"}`,
     `Description: ${task.description ?? "No description"}`,
     `Tags: ${task.tags.length > 0 ? task.tags.join(", ") : "None"}`,
     `Due Date: ${task.dueDate ?? "No due date"}`,
@@ -274,6 +280,26 @@ export function registerReadTools(server: McpServer): void {
         }
 
         return textResult(lines.join("\n"));
+      } catch (error) {
+        return errorResult(error instanceof Error ? error.message : String(error));
+      }
+    }
+  );
+
+  // Tool 5: get_active_task
+  server.tool(
+    "get_active_task",
+    "Get the currently active task being worked on",
+    {},
+    async () => {
+      try {
+        const data = (await callMcpApi("/mcp/tasks/active")) as { task: TaskData | null };
+
+        if (!data.task) {
+          return textResult("No active task. Use set_active_task to start working on something!");
+        }
+
+        return textResult(formatTaskDetail(data.task) + "\n\n🔥 This is your CURRENTLY ACTIVE task!");
       } catch (error) {
         return errorResult(error instanceof Error ? error.message : String(error));
       }

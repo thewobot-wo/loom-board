@@ -61,6 +61,7 @@ type TaskDoc = {
   archived: boolean;
   updatedAt: number;
   userId?: Id<"users">;
+  isActive?: boolean;
 };
 
 function formatTask(task: TaskDoc) {
@@ -75,6 +76,7 @@ function formatTask(task: TaskDoc) {
     dueDateTimestamp: task.dueDate ?? null,
     order: task.order,
     archived: task.archived,
+    isActive: task.isActive ?? false,
     createdAt: formatDate(task._creationTime),
     updatedAt: formatDate(task.updatedAt),
   };
@@ -161,6 +163,7 @@ export const createTaskInternal = internalMutation({
       archived: false,
       updatedAt: now,
       userId: args.userId,
+      isActive: false,
     });
 
     // Log creation in activity history
@@ -384,6 +387,87 @@ export const searchTasksInternal = internalQuery({
     }
 
     return tasks;
+  },
+});
+
+export const getActiveTaskInternal = internalQuery({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const tasks = await ctx.db
+      .query("tasks")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .filter((q) => q.and(
+        q.eq(q.field("isActive"), true),
+        q.eq(q.field("archived"), false)
+      ))
+      .collect();
+
+    return tasks[0] ?? null;
+  },
+});
+
+export const setActiveTaskInternal = internalMutation({
+  args: {
+    userId: v.id("users"),
+    taskId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const taskId = args.taskId as Id<"tasks">;
+    const task = await ctx.db.get(taskId);
+    if (!task) throw new Error(`Task not found with ID: ${args.taskId}`);
+    if (task.userId !== args.userId) throw new Error("Not authorized to modify this task");
+    if (task.archived) throw new Error("Cannot activate archived task");
+
+    // Find and deactivate any currently active tasks
+    const currentlyActive = await ctx.db
+      .query("tasks")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .filter((q) => q.and(
+        q.eq(q.field("isActive"), true),
+        q.eq(q.field("archived"), false)
+      ))
+      .collect();
+
+    for (const activeTask of currentlyActive) {
+      if (activeTask._id !== taskId) {
+        await ctx.db.patch(activeTask._id, {
+          isActive: false,
+          updatedAt: Date.now(),
+        });
+      }
+    }
+
+    // Activate the new task
+    await ctx.db.patch(taskId, {
+      isActive: true,
+      updatedAt: Date.now(),
+    });
+
+    const updatedTask = await ctx.db.get(taskId);
+    return updatedTask!;
+  },
+});
+
+export const clearActiveTaskInternal = internalMutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const currentlyActive = await ctx.db
+      .query("tasks")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .filter((q) => q.and(
+        q.eq(q.field("isActive"), true),
+        q.eq(q.field("archived"), false)
+      ))
+      .collect();
+
+    for (const task of currentlyActive) {
+      await ctx.db.patch(task._id, {
+        isActive: false,
+        updatedAt: Date.now(),
+      });
+    }
+
+    return { success: true };
   },
 });
 
@@ -718,6 +802,64 @@ export const getBoardSummary = httpAction(async (ctx, request) => {
         tasks: overdueTasks,
       },
     });
+  } catch (e: any) {
+    if (e.message === "UNAUTHORIZED") return errorResponse("Unauthorized", 401);
+    return errorResponse(e.message ?? "Internal server error", 500);
+  }
+});
+
+// 10. Get the currently active task
+export const getActiveTask = httpAction(async (ctx, request) => {
+  try {
+    const { userId } = validateToken(request);
+
+    const task = await ctx.runQuery(internal.mcpApi.getActiveTaskInternal, {
+      userId,
+    });
+
+    return jsonResponse({ task: task ? formatTask(task) : null });
+  } catch (e: any) {
+    if (e.message === "UNAUTHORIZED") return errorResponse("Unauthorized", 401);
+    return errorResponse(e.message ?? "Internal server error", 500);
+  }
+});
+
+// 11. Set a task as active
+export const setActiveTask = httpAction(async (ctx, request) => {
+  try {
+    const { userId } = validateToken(request);
+
+    const body = await request.json();
+    const { id } = body;
+
+    if (!id) {
+      return errorResponse("Missing required field: id", 400);
+    }
+
+    const task = await ctx.runMutation(internal.mcpApi.setActiveTaskInternal, {
+      userId,
+      taskId: id,
+    });
+
+    return jsonResponse({ task: formatTask(task) });
+  } catch (e: any) {
+    if (e.message === "UNAUTHORIZED") return errorResponse("Unauthorized", 401);
+    if (e.message?.includes("not found")) return errorResponse(e.message, 404);
+    if (e.message?.includes("Not authorized")) return errorResponse(e.message, 403);
+    return errorResponse(e.message ?? "Internal server error", 500);
+  }
+});
+
+// 12. Clear the currently active task
+export const clearActiveTask = httpAction(async (ctx, request) => {
+  try {
+    const { userId } = validateToken(request);
+
+    await ctx.runMutation(internal.mcpApi.clearActiveTaskInternal, {
+      userId,
+    });
+
+    return jsonResponse({ success: true });
   } catch (e: any) {
     if (e.message === "UNAUTHORIZED") return errorResponse("Unauthorized", 401);
     return errorResponse(e.message ?? "Internal server error", 500);

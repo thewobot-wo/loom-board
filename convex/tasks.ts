@@ -30,6 +30,7 @@ export const createTask = mutation({
       archived: false,
       updatedAt: now,
       userId, // Auto-assign to authenticated user
+      isActive: false, // Default to not active
     });
 
     // Log creation in activity history
@@ -229,5 +230,120 @@ export const listArchivedTasks = query({
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .filter((q) => q.eq(q.field("archived"), true))
       .collect();
+  },
+});
+
+// READ: Get the currently active task for authenticated user
+export const getActiveTask = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+
+    const activeTasks = await ctx.db
+      .query("tasks")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .filter((q) => q.and(
+        q.eq(q.field("isActive"), true),
+        q.eq(q.field("archived"), false)
+      ))
+      .collect();
+
+    return activeTasks[0] ?? null;
+  },
+});
+
+// MUTATION: Set a task as active (and deactivate all others)
+export const setActiveTask = mutation({
+  args: { id: v.id("tasks") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+
+    const task = await ctx.db.get(args.id);
+    if (!task) throw new Error("Task not found");
+    if (task.userId !== userId) throw new Error("Not authorized");
+    if (task.archived) throw new Error("Cannot activate archived task");
+
+    // Find and deactivate any currently active tasks
+    const currentlyActive = await ctx.db
+      .query("tasks")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .filter((q) => q.and(
+        q.eq(q.field("isActive"), true),
+        q.eq(q.field("archived"), false)
+      ))
+      .collect();
+
+    for (const activeTask of currentlyActive) {
+      if (activeTask._id !== args.id) {
+        await ctx.db.patch(activeTask._id, {
+          isActive: false,
+          updatedAt: Date.now(),
+        });
+
+        // Log deactivation
+        await ctx.db.insert("activity_history", {
+          taskId: activeTask._id,
+          field: "isActive",
+          oldValue: JSON.stringify(true),
+          newValue: JSON.stringify(false),
+          userId: userId.toString(),
+        });
+      }
+    }
+
+    // Activate the new task
+    await ctx.db.patch(args.id, {
+      isActive: true,
+      updatedAt: Date.now(),
+    });
+
+    // Log activation
+    await ctx.db.insert("activity_history", {
+      taskId: args.id,
+      field: "isActive",
+      oldValue: JSON.stringify(task.isActive),
+      newValue: JSON.stringify(true),
+      userId: userId.toString(),
+    });
+
+    return await ctx.db.get(args.id);
+  },
+});
+
+// MUTATION: Deactivate the currently active task
+export const clearActiveTask = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+
+    const currentlyActive = await ctx.db
+      .query("tasks")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .filter((q) => q.and(
+        q.eq(q.field("isActive"), true),
+        q.eq(q.field("archived"), false)
+      ))
+      .collect();
+
+    for (const task of currentlyActive) {
+      await ctx.db.patch(task._id, {
+        isActive: false,
+        updatedAt: Date.now(),
+      });
+
+      // Log deactivation
+      await ctx.db.insert("activity_history", {
+        taskId: task._id,
+        field: "isActive",
+        oldValue: JSON.stringify(true),
+        newValue: JSON.stringify(false),
+        userId: userId.toString(),
+      });
+    }
+
+    return { success: true };
   },
 });

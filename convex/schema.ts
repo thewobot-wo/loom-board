@@ -31,6 +31,7 @@ export default defineSchema({
     archived: v.boolean(), // soft delete flag
     updatedAt: v.number(), // manual timestamp (ms since epoch)
     userId: v.optional(v.id("users")), // owner of the task (optional for migration)
+    isActive: v.optional(v.boolean()), // currently being worked on
     // Note: _id and _creationTime are automatic from Convex
   })
     // Compound index for querying by status with order
@@ -39,7 +40,8 @@ export default defineSchema({
     .index("by_priority", ["priority"])
     .index("by_dueDate", ["dueDate"])
     .index("by_archived", ["archived"])
-    .index("by_user", ["userId"]), // Query tasks by owner
+    .index("by_user", ["userId"]) // Query tasks by owner
+    .index("by_isActive", ["isActive"]),
 
   activity_history: defineTable({
     taskId: v.id("tasks"),

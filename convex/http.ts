@@ -11,6 +11,9 @@ import {
   archiveTask,
   searchTasks,
   getBoardSummary,
+  getActiveTask,
+  setActiveTask,
+  clearActiveTask,
 } from "./mcpApi";
 
 const http = httpRouter();
@@ -62,5 +65,13 @@ http.route({ path: "/mcp/tasks/search", method: "OPTIONS", handler: corsPrefligh
 
 http.route({ path: "/mcp/board/summary", method: "POST", handler: getBoardSummary });
 http.route({ path: "/mcp/board/summary", method: "OPTIONS", handler: corsPreflightHandler });
+
+// Active task endpoints
+http.route({ path: "/mcp/tasks/active", method: "GET", handler: getActiveTask });
+http.route({ path: "/mcp/tasks/active", method: "OPTIONS", handler: corsPreflightHandler });
+
+http.route({ path: "/mcp/tasks/active", method: "POST", handler: setActiveTask });
+http.route({ path: "/mcp/tasks/active/clear", method: "POST", handler: clearActiveTask });
+http.route({ path: "/mcp/tasks/active/clear", method: "OPTIONS", handler: corsPreflightHandler });
 
 export default http;

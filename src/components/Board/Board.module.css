@@ -1,5 +1,5 @@
 .container {
-  padding: 24px;
+  padding: var(--space-5) var(--space-6);
   max-width: 1800px;
   margin: 0 auto;
 }
@@ -7,16 +7,20 @@
 .board {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  gap: var(--space-5);
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1400px) {
   .board {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+  .container {
+    padding: var(--space-4);
+  }
+  
   .board {
     grid-template-columns: 1fr;
   }
@@ -25,16 +29,16 @@
 .loading {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  gap: var(--space-5);
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1400px) {
   .loading {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .loading {
     grid-template-columns: 1fr;
   }
@@ -42,6 +46,6 @@
 
 /* Drag overlay styles */
 .dragOverlay {
-  transform: rotate(3deg);
-  box-shadow: var(--shadow-hover);
+  transform: rotate(3deg) scale(1.02);
+  box-shadow: var(--shadow-lg);
 }

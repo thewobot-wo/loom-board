@@ -1,7 +1,7 @@
 /**
  * Write MCP tool registrations.
  *
- * Registers 5 tools: create_task, update_task, move_task, delete_task, archive_task
+ * Registers 7 tools: create_task, update_task, move_task, delete_task, archive_task, set_active_task, clear_active_task
  * All tools call the Convex HTTP API endpoints via POST and return formatted text.
  */
 
@@ -22,6 +22,7 @@ interface TaskData {
   dueDateTimestamp: number | null;
   order: number;
   archived: boolean;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -35,6 +36,13 @@ interface SuccessResponse {
 }
 
 // --- Formatting helpers ---
+
+const STATUS_LABELS: Record<string, string> = {
+  backlog: "Backlog",
+  in_progress: "In Progress",
+  blocked: "Blocked",
+  done: "Done",
+};
 
 const STATUS_LABELS: Record<string, string> = {
   backlog: "Backlog",
@@ -244,6 +252,51 @@ export function registerWriteTools(server: McpServer): void {
         }) as SuccessResponse;
 
         return textResult("Task archived successfully.");
+      } catch (error) {
+        return errorResult(error instanceof Error ? error.message : String(error));
+      }
+    }
+  );
+
+  // Tool 6: set_active_task
+  server.tool(
+    "set_active_task",
+    "Set a task as the currently active task being worked on",
+    {
+      id: z.string().describe("Task ID to set as active"),
+    },
+    async ({ id }) => {
+      try {
+        const data = (await callMcpApi("/mcp/tasks/active", {
+          method: "POST",
+          body: { id },
+        })) as TaskResponse;
+
+        return textResult(
+          `🔥 Now actively working on: ${data.task.title}\n\n` +
+          `ID: ${data.task.id}\n` +
+          `Status: ${STATUS_LABELS[data.task.status] ?? data.task.status}\n` +
+          `Priority: ${formatPriority(data.task.priority)}`
+        );
+      } catch (error) {
+        return errorResult(error instanceof Error ? error.message : String(error));
+      }
+    }
+  );
+
+  // Tool 7: clear_active_task
+  server.tool(
+    "clear_active_task",
+    "Clear the currently active task (stop working on everything)",
+    {},
+    async () => {
+      try {
+        await callMcpApi("/mcp/tasks/active/clear", {
+          method: "POST",
+          body: {},
+        }) as SuccessResponse;
+
+        return textResult("Active task cleared. Time for a break? ☕️");
       } catch (error) {
         return errorResult(error instanceof Error ? error.message : String(error));
       }

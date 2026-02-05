@@ -43,6 +43,7 @@ export const migrateLocalTasks = mutation({
         archived: false,
         updatedAt: task.updatedAt,
         userId,
+        isActive: false,
       });
 
       // Create migration activity history entry

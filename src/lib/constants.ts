@@ -49,12 +49,15 @@ export const PRIORITY_CONFIG = {
 export type Priority = keyof typeof PRIORITY_CONFIG;
 
 export const TAG_COLORS: Record<string, { bg: string; text: string }> = {
-  project: { bg: "rgba(31, 111, 235, 0.15)", text: "var(--accent-blue)" },
-  research: { bg: "rgba(137, 87, 229, 0.15)", text: "var(--accent-purple)" },
-  bug: { bg: "rgba(248, 81, 73, 0.15)", text: "var(--accent-red)" },
-  feature: { bg: "rgba(63, 185, 80, 0.15)", text: "var(--accent-green)" },
-  maintenance: { bg: "rgba(210, 153, 34, 0.15)", text: "var(--accent-yellow)" },
-  cruise: { bg: "rgba(163, 113, 247, 0.15)", text: "#bc8cff" },
+  project: { bg: "rgba(59, 130, 246, 0.12)", text: "var(--accent-blue)" },
+  research: { bg: "rgba(139, 92, 246, 0.12)", text: "var(--accent-purple)" },
+  bug: { bg: "rgba(239, 68, 68, 0.12)", text: "var(--accent-red)" },
+  feature: { bg: "rgba(16, 185, 129, 0.12)", text: "var(--accent-green)" },
+  maintenance: { bg: "rgba(245, 158, 11, 0.12)", text: "var(--accent-yellow)" },
+  cruise: { bg: "rgba(236, 72, 153, 0.12)", text: "var(--accent-pink)" },
+  loom: { bg: "rgba(59, 130, 246, 0.2)", text: "var(--accent-blue)" },
+  celebration: { bg: "rgba(236, 72, 153, 0.2)", text: "var(--accent-pink)" },
+  "mcp-victory": { bg: "rgba(16, 185, 129, 0.2)", text: "var(--accent-green)" },
 };
 
 export const COLUMN_ORDER: Status[] = ["backlog", "in_progress", "blocked", "done"];
