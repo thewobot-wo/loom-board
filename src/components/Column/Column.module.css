@@ -13,11 +13,17 @@
   margin-bottom: var(--space-2);
 }
 
+/* Status dots using Seurat's palette */
 .icon {
   width: 8px;
   height: 8px;
   border-radius: 50%;
 }
+
+.icon[data-status="backlog"] { background: var(--seurat-shadow); }
+.icon[data-status="in_progress"] { background: var(--seurat-water); }
+.icon[data-status="blocked"] { background: var(--seurat-red); }
+.icon[data-status="done"] { background: var(--seurat-grass); }
 
 .title {
   font-size: var(--text-sm);
@@ -61,10 +67,11 @@
 }
 
 .dragOver {
-  background: rgba(59, 130, 246, 0.03);
+  background: var(--seurat-grass-muted);
   border-radius: var(--radius);
 }
 
+/* Add button - like a figure in the grass */
 .addButton {
   margin-top: var(--space-2);
   padding: var(--space-3) var(--space-2);
@@ -82,8 +89,8 @@
 }
 
 .addButton:hover {
-  background: var(--bg-hover);
-  color: var(--text-secondary);
+  background: var(--seurat-grass-muted);
+  color: var(--seurat-grass);
 }
 
 /* Skeleton */

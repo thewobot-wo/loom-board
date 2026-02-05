@@ -9,7 +9,7 @@
 }
 
 .card:hover {
-  border-color: var(--border-hover);
+  border-color: var(--seurat-grass);
   box-shadow: var(--shadow-md);
 }
 
@@ -23,11 +23,11 @@
 }
 
 .card.active {
-  border-color: var(--status-progress);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
+  border-color: var(--seurat-water);
+  background: var(--seurat-water-muted);
 }
 
-/* Priority indicator - subtle left border */
+/* Priority indicator - Seurat's pointillist dots */
 .priorityIndicator {
   position: absolute;
   left: 0;
@@ -37,10 +37,10 @@
   border-radius: 0 var(--radius-full) var(--radius-full) 0;
 }
 
-.priorityUrgent { background: var(--priority-urgent); }
-.priorityHigh { background: var(--priority-high); }
-.priorityMedium { background: var(--priority-normal); }
-.priorityLow { background: var(--priority-low); }
+.priorityUrgent { background: var(--seurat-red); }
+.priorityHigh { background: var(--seurat-orange); }
+.priorityMedium { background: var(--seurat-water); }
+.priorityLow { background: var(--seurat-shadow); }
 
 .content {
   padding-left: var(--space-2);
@@ -61,13 +61,15 @@
   flex: 1;
 }
 
+/* Active indicator - a dappled dot */
 .activeIndicator {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--status-progress);
+  background: var(--seurat-water);
   flex-shrink: 0;
   margin-top: 6px;
+  box-shadow: 0 0 0 2px var(--seurat-water-muted);
 }
 
 .title {
@@ -100,7 +102,7 @@
 
 .menu:hover {
   background: var(--bg-hover);
-  color: var(--text-secondary);
+  color: var(--seurat-grass);
 }
 
 .description {
@@ -123,21 +125,33 @@
 
 .tags {
   display: flex;
-  gap: var(--space-1);
+  gap: var(--space-2);
 }
 
+/* Tags with Seurat colors */
 .tag {
   font-size: var(--text-xs);
   font-weight: 500;
   color: var(--text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.3px;
+  transition: var(--transition-fast);
+}
+
+.tag:hover {
+  color: var(--seurat-grass);
 }
 
 .tag::before {
   content: '#';
-  opacity: 0.5;
+  opacity: 0.4;
 }
+
+/* Different tag colors */
+.tag[data-tag="project"] { color: var(--seurat-water); }
+.tag[data-tag="design"] { color: var(--seurat-grass); }
+.tag[data-tag="loom-board"] { color: var(--seurat-orange); }
+.tag[data-tag="feature"] { color: var(--seurat-shadow); }
 
 .dueDate {
   font-size: var(--text-xs);
@@ -154,11 +168,11 @@
 }
 
 .overdue {
-  color: var(--priority-urgent);
+  color: var(--seurat-red);
 }
 
 .dueSoon {
-  color: var(--priority-high);
+  color: var(--seurat-orange);
 }
 
 /* Skeleton */
@@ -177,7 +191,7 @@
 
 .dragOverlay {
   background: var(--bg-primary);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--seurat-grass);
   border-radius: var(--radius-md);
   padding: var(--space-4);
   box-shadow: var(--shadow-lg);

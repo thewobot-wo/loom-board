@@ -1,27 +1,27 @@
 :root {
-  /* === THOUGHTFUL DESIGN SYSTEM === */
-  /* Inspired by Linear, Notion, Things 3 */
+  /* === SEURAT-INSPIRED: A SUNDAY AFTERNOON === */
+  /* Pointillist colors, muted and dappled */
   
-  /* Background - subtle warmth, layers of depth */
-  --bg-canvas: #fafafa;
-  --bg-primary: #ffffff;
-  --bg-secondary: #f5f5f5;
-  --bg-tertiary: #ebebeb;
-  --bg-hover: #f0f0f0;
+  /* Background - grass, water, sky */
+  --bg-canvas: #f8f6f1;
+  --bg-primary: #fdfcfa;
+  --bg-secondary: #f5f3ed;
+  --bg-tertiary: #ebe8e0;
+  --bg-hover: #f0ede6;
   
-  /* For dark mode preference - soft dark */
   @media (prefers-color-scheme: dark) {
-    --bg-canvas: #0c0c0c;
-    --bg-primary: #141414;
-    --bg-secondary: #1a1a1a;
-    --bg-tertiary: #222222;
-    --bg-hover: #1f1f1f;
+    /* Evening shadows on the grass */
+    --bg-canvas: #1a1d1f;
+    --bg-primary: #232629;
+    --bg-secondary: #2a2d31;
+    --bg-tertiary: #32363a;
+    --bg-hover: #2e3135;
   }
   
-  /* Borders - nearly invisible, only for structure */
-  --border: rgba(0, 0, 0, 0.06);
-  --border-strong: rgba(0, 0, 0, 0.1);
-  --border-hover: rgba(0, 0, 0, 0.15);
+  /* Borders - like the painting's edge */
+  --border: rgba(60, 60, 60, 0.08);
+  --border-strong: rgba(60, 60, 60, 0.12);
+  --border-hover: rgba(60, 60, 60, 0.2);
   
   @media (prefers-color-scheme: dark) {
     --border: rgba(255, 255, 255, 0.06);
@@ -29,45 +29,66 @@
     --border-hover: rgba(255, 255, 255, 0.15);
   }
   
-  /* Text - refined hierarchy through weight and opacity */
-  --text-primary: #111111;
-  --text-secondary: #666666;
+  /* Text - soft charcoal like shadows */
+  --text-primary: #2d2d2d;
+  --text-secondary: #5a5a5a;
   --text-tertiary: #888888;
   --text-muted: #aaaaaa;
   
   @media (prefers-color-scheme: dark) {
-    --text-primary: #f5f5f5;
+    --text-primary: #e8e6e1;
     --text-secondary: #a0a0a0;
     --text-tertiary: #808080;
     --text-muted: #606060;
   }
   
-  /* Status colors - muted and purposeful */
-  --status-backlog: #6b7280;
-  --status-progress: #3b82f6;
-  --status-blocked: #ef4444;
-  --status-done: #10b981;
+  /* === SEURAT COLORS === */
+  /* Grass and foliage */
+  --seurat-grass: #8b9a5b;
+  --seurat-grass-light: #a8b876;
+  --seurat-grass-muted: rgba(139, 154, 91, 0.15);
   
-  /* Priority - subtle dots, not loud bars */
-  --priority-urgent: #ef4444;
-  --priority-high: #f59e0b;
-  --priority-normal: #3b82f6;
-  --priority-low: #6b7280;
+  /* Water and sky */
+  --seurat-water: #7a9eb8;
+  --seurat-water-light: #9bbad1;
+  --seurat-water-muted: rgba(122, 158, 184, 0.15);
   
-  /* Shadows - depth without distraction */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  /* Shadow purples */
+  --seurat-shadow: #6b6b8a;
+  --seurat-shadow-muted: rgba(107, 107, 138, 0.15);
   
-  /* Radius - soft, approachable */
-  --radius-sm: 6px;
+  /* Clothing accents */
+  --seurat-red: #b85450;
+  --seurat-red-muted: rgba(184, 84, 80, 0.12);
+  --seurat-orange: #c9875a;
+  --seurat-orange-muted: rgba(201, 135, 90, 0.12);
+  
+  /* Status - using Seurat's palette */
+  --status-backlog: var(--seurat-shadow);
+  --status-progress: var(--seurat-water);
+  --status-blocked: var(--seurat-red);
+  --status-done: var(--seurat-grass);
+  
+  /* Priority - dappled hints */
+  --priority-urgent: var(--seurat-red);
+  --priority-high: var(--seurat-orange);
+  --priority-normal: var(--seurat-water);
+  --priority-low: var(--seurat-shadow);
+  
+  /* Shadows - soft as afternoon light */
+  --shadow-sm: 0 1px 2px rgba(45, 45, 45, 0.04);
+  --shadow: 0 1px 3px rgba(45, 45, 45, 0.06);
+  --shadow-md: 0 4px 12px rgba(45, 45, 45, 0.08);
+  --shadow-lg: 0 8px 24px rgba(45, 45, 45, 0.1);
+  
+  /* Radius - organic, natural */
+  --radius-sm: 4px;
   --radius: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-full: 9999px;
   
-  /* Typography scale - meaningful hierarchy */
+  /* Typography */
   --text-xs: 11px;
   --text-sm: 12px;
   --text-base: 13px;
@@ -75,7 +96,7 @@
   --text-lg: 16px;
   --text-xl: 20px;
   
-  /* Spacing - consistent 4px base */
+  /* Spacing */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -85,20 +106,15 @@
   --space-8: 32px;
   --space-10: 40px;
   
-  /* Transitions - snappy but smooth */
+  /* Transitions */
   --transition-fast: 0.1s ease;
   --transition: 0.15s ease;
-  --transition-slow: 0.2s ease;
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-}
-
-html {
-  scroll-behavior: smooth;
 }
 
 body {
@@ -108,7 +124,6 @@ body {
   min-height: 100vh;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Invisible scrollbar */
@@ -126,10 +141,6 @@ body {
   border-radius: var(--radius-full);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
-}
-
 ::selection {
-  background: rgba(59, 130, 246, 0.15);
+  background: var(--seurat-water-muted);
 }
