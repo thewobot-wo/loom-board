@@ -1,5 +1,5 @@
 .header {
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
   border-bottom: 1px solid var(--border);
   padding: var(--space-4) var(--space-5);
   position: sticky;
@@ -29,8 +29,8 @@
 }
 
 .logo {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   color: var(--text-primary);
 }
 
@@ -40,57 +40,35 @@
 }
 
 .title {
-  font-size: 20px;
+  font-size: var(--text-xl);
   font-weight: 600;
   color: var(--text-primary);
-  letter-spacing: -0.3px;
-}
-
-.statusBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--accent-green);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.statusDot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--accent-green);
+  letter-spacing: -0.5px;
 }
 
 .right {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  background: var(--bg-tertiary);
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: var(--text-sm);
   font-weight: 500;
   cursor: pointer;
   transition: var(--transition);
 }
 
 .btn:hover {
-  background: var(--bg-elevated);
+  background: var(--bg-hover);
   border-color: var(--border-hover);
   color: var(--text-primary);
 }
@@ -101,15 +79,9 @@
 }
 
 .taskCount {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 8px 14px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-size: 13px;
+  font-size: var(--text-sm);
   color: var(--text-muted);
+  padding: 0 var(--space-2);
 }
 
 .countNumber {
@@ -128,33 +100,31 @@
 .userInfo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .avatar {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   object-fit: cover;
-  border: 1px solid var(--border);
 }
 
 .avatarPlaceholder {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: var(--bg-elevated);
+  background: var(--bg-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--text-secondary);
-  border: 1px solid var(--border);
 }
 
 .userName {
-  font-size: 13px;
+  font-size: var(--text-sm);
   font-weight: 500;
   color: var(--text-secondary);
   max-width: 120px;
@@ -164,7 +134,7 @@
 }
 
 .signOutBtn {
-  padding: 6px;
+  padding: var(--space-1);
   background: transparent;
   border: none;
   border-radius: var(--radius);
@@ -177,18 +147,18 @@
 }
 
 .signOutBtn:hover {
-  color: var(--accent-red);
-  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  background: var(--bg-hover);
 }
 
 .signOutBtn svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 
 /* Active Task Banner */
 .activeTaskBanner {
-  background: var(--bg-tertiary);
+  background: var(--bg-secondary);
   border-bottom: 1px solid var(--border);
 }
 
@@ -198,23 +168,28 @@
   padding: var(--space-3) var(--space-5);
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-3);
+}
+
+.activeIndicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--status-progress);
+  flex-shrink: 0;
 }
 
 .activeTaskLabel {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
+  font-size: var(--text-xs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--accent-blue);
+  color: var(--text-tertiary);
   flex-shrink: 0;
 }
 
 .activeTaskTitle {
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 500;
   color: var(--text-primary);
   flex: 1;
@@ -231,31 +206,10 @@
 }
 
 .priorityBadge {
-  padding: 3px 8px;
-  border-radius: var(--radius-sm);
-  font-size: 10px;
+  font-size: var(--text-xs);
   font-weight: 600;
   text-transform: uppercase;
-}
-
-.priority_urgent {
-  background: rgba(248, 113, 113, 0.1);
-  color: var(--accent-red);
-}
-
-.priority_high {
-  background: rgba(251, 191, 36, 0.1);
-  color: var(--accent-yellow);
-}
-
-.priority_medium {
-  background: rgba(96, 165, 250, 0.1);
-  color: var(--accent-blue);
-}
-
-.priority_low {
-  background: rgba(107, 114, 128, 0.1);
-  color: var(--text-muted);
+  color: var(--text-tertiary);
 }
 
 @media (max-width: 768px) {
@@ -268,19 +222,14 @@
   }
   
   .title {
-    font-size: 18px;
+    font-size: var(--text-lg);
   }
   
   .userName {
     display: none;
   }
   
-  .btn span {
-    display: none;
-  }
-  
   .activeTaskContent {
-    flex-wrap: wrap;
     padding: var(--space-3) var(--space-4);
   }
 }

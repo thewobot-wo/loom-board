@@ -1,53 +1,94 @@
 :root {
-  /* Soft, Minimal Dark Theme */
+  /* === THOUGHTFUL DESIGN SYSTEM === */
+  /* Inspired by Linear, Notion, Things 3 */
   
-  /* Background - subtle depth, warm undertones */
-  --bg-primary: #0d0f12;
-  --bg-secondary: #14171c;
-  --bg-tertiary: #1c2026;
-  --bg-elevated: #252a31;
+  /* Background - subtle warmth, layers of depth */
+  --bg-canvas: #fafafa;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-tertiary: #ebebeb;
+  --bg-hover: #f0f0f0;
   
-  /* Borders - barely there */
-  --border: rgba(255, 255, 255, 0.04);
-  --border-hover: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.12);
+  /* For dark mode preference - soft dark */
+  @media (prefers-color-scheme: dark) {
+    --bg-canvas: #0c0c0c;
+    --bg-primary: #141414;
+    --bg-secondary: #1a1a1a;
+    --bg-tertiary: #222222;
+    --bg-hover: #1f1f1f;
+  }
   
-  /* Text - soft hierarchy */
-  --text-primary: #f0f1f3;
-  --text-secondary: #9ca3af;
-  --text-muted: #6b7280;
+  /* Borders - nearly invisible, only for structure */
+  --border: rgba(0, 0, 0, 0.06);
+  --border-strong: rgba(0, 0, 0, 0.1);
+  --border-hover: rgba(0, 0, 0, 0.15);
   
-  /* Accents - muted and sophisticated */
-  --accent-blue: #60a5fa;
-  --accent-green: #34d399;
-  --accent-red: #f87171;
-  --accent-yellow: #fbbf24;
-  --accent-purple: #a78bfa;
+  @media (prefers-color-scheme: dark) {
+    --border: rgba(255, 255, 255, 0.06);
+    --border-strong: rgba(255, 255, 255, 0.1);
+    --border-hover: rgba(255, 255, 255, 0.15);
+  }
   
-  /* Shadows - soft and diffused */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.25);
+  /* Text - refined hierarchy through weight and opacity */
+  --text-primary: #111111;
+  --text-secondary: #666666;
+  --text-tertiary: #888888;
+  --text-muted: #aaaaaa;
   
-  /* Radius - soft rounded corners */
+  @media (prefers-color-scheme: dark) {
+    --text-primary: #f5f5f5;
+    --text-secondary: #a0a0a0;
+    --text-tertiary: #808080;
+    --text-muted: #606060;
+  }
+  
+  /* Status colors - muted and purposeful */
+  --status-backlog: #6b7280;
+  --status-progress: #3b82f6;
+  --status-blocked: #ef4444;
+  --status-done: #10b981;
+  
+  /* Priority - subtle dots, not loud bars */
+  --priority-urgent: #ef4444;
+  --priority-high: #f59e0b;
+  --priority-normal: #3b82f6;
+  --priority-low: #6b7280;
+  
+  /* Shadows - depth without distraction */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  
+  /* Radius - soft, approachable */
   --radius-sm: 6px;
-  --radius: 10px;
-  --radius-md: 14px;
-  --radius-lg: 18px;
+  --radius: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
   --radius-full: 9999px;
   
-  /* Transitions */
-  --transition-fast: all 0.15s ease;
-  --transition: all 0.2s ease;
+  /* Typography scale - meaningful hierarchy */
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 13px;
+  --text-md: 14px;
+  --text-lg: 16px;
+  --text-xl: 20px;
   
-  /* Spacing */
+  /* Spacing - consistent 4px base */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
   --space-5: 20px;
   --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  
+  /* Transitions - snappy but smooth */
+  --transition-fast: 0.1s ease;
+  --transition: 0.15s ease;
+  --transition-slow: 0.2s ease;
 }
 
 * {
@@ -56,17 +97,21 @@
   padding: 0;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-  background: var(--bg-primary);
-  color: var(--text-secondary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg-canvas);
+  color: var(--text-primary);
   min-height: 100vh;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Subtle scrollbar */
+/* Invisible scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -86,6 +131,5 @@ body {
 }
 
 ::selection {
-  background: rgba(96, 165, 250, 0.2);
-  color: var(--text-primary);
+  background: rgba(59, 130, 246, 0.15);
 }
