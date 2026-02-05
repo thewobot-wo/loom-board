@@ -30,53 +30,49 @@
   box-shadow: 0 0 0 3px var(--seurat-water-muted), var(--shadow-md);
 }
 
-/* Soft gradient priority indicator - fades before half width v2 */
+/* Soft gradient priority indicator - starts 60% opacity, fades to transparent at 75% */
 .priorityIndicator {
   position: absolute;
   left: 0;
   top: 0;
   bottom: 0;
-  width: 45%;
+  width: 75%;
   pointer-events: none;
 }
 
 .priorityUrgent {
   background: linear-gradient(
     90deg,
-    var(--seurat-red) 0%,
-    rgba(184, 80, 70, 0.5) 20%,
-    rgba(184, 80, 70, 0.1) 40%,
-    transparent 45%
+    rgba(184, 80, 70, 0.4) 0%,
+    rgba(184, 80, 70, 0.2) 50%,
+    transparent 75%
   );
 }
 
 .priorityHigh {
   background: linear-gradient(
     90deg,
-    var(--seurat-orange) 0%,
-    rgba(184, 122, 78, 0.5) 20%,
-    rgba(184, 122, 78, 0.1) 40%,
-    transparent 45%
+    rgba(184, 122, 78, 0.4) 0%,
+    rgba(184, 122, 78, 0.2) 50%,
+    transparent 75%
   );
 }
 
 .priorityMedium {
   background: linear-gradient(
     90deg,
-    var(--seurat-water) 0%,
-    rgba(90, 138, 160, 0.5) 20%,
-    rgba(90, 138, 160, 0.1) 40%,
-    transparent 45%
+    rgba(90, 138, 160, 0.4) 0%,
+    rgba(90, 138, 160, 0.2) 50%,
+    transparent 75%
   );
 }
 
 .priorityLow {
   background: linear-gradient(
     90deg,
-    var(--seurat-shadow) 0%,
-    rgba(122, 122, 138, 0.5) 20%,
-    rgba(122, 122, 138, 0.1) 40%,
-    transparent 45%
+    rgba(122, 122, 138, 0.4) 0%,
+    rgba(122, 122, 138, 0.2) 50%,
+    transparent 75%
   );
 }
 
