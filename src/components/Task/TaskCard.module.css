@@ -30,13 +30,13 @@
   box-shadow: 0 0 0 3px var(--seurat-water-muted), var(--shadow-md);
 }
 
-/* Soft gradient priority indicator - fades before half width */
+/* Soft gradient priority indicator - fades before half width v2 */
 .priorityIndicator {
   position: absolute;
   left: 0;
   top: 0;
   bottom: 0;
-  width: 40%;
+  width: 45%;
   pointer-events: none;
 }
 
