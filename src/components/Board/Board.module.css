@@ -129,9 +129,6 @@
   min-width: 100vw;
   max-width: 100vw;
   padding: var(--space-3);
-  opacity: 0.3;
-  transform: scale(0.95);
-  transition: opacity 0.3s ease, transform 0.3s ease;
   box-sizing: border-box;
   position: relative;
   scroll-snap-align: start;
