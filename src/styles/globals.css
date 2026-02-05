@@ -2,12 +2,12 @@
   /* === CHROMOLUME #7: COLOR AND LIGHT === */
   /* Based on the logo - primary colors creating harmony */
   
-  /* Background - warm paper tone */
-  --bg-canvas: #f5f0e8;
-  --bg-primary: #faf8f5;
-  --bg-secondary: #f0ebe3;
-  --bg-tertiary: #e8e0d6;
-  --bg-hover: #ede6dc;
+  /* Background - slightly darker warm paper */
+  --bg-canvas: #e0d8cc;
+  --bg-primary: rgba(250, 248, 245, 0.85);
+  --bg-secondary: #e8e0d4;
+  --bg-tertiary: #ddd5c8;
+  --bg-hover: #e2dacf;
   
   /* Borders - warm neutrals */
   --border: rgba(100, 90, 80, 0.08);
