@@ -1,15 +1,25 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { Doc } from "../../../convex/_generated/dataModel";
+import type { Doc, Id } from "../../../convex/_generated/dataModel";
+import type { Status } from "@/lib/constants";
 import { TaskCard } from "./TaskCard";
 import styles from "./TaskCard.module.css";
 
 interface SortableTaskCardProps {
   task: Doc<"tasks">;
   onEdit?: (taskId: string) => void;
+  onDelete?: (taskId: string) => void;
+  onSetActive?: (taskId: string) => void;
+  onMoveTask?: (taskId: string, newStatus: Status) => void;
 }
 
-export function SortableTaskCard({ task, onEdit }: SortableTaskCardProps) {
+export function SortableTaskCard({ 
+  task, 
+  onEdit, 
+  onDelete, 
+  onSetActive, 
+  onMoveTask 
+}: SortableTaskCardProps) {
   const {
     attributes,
     listeners,
@@ -34,7 +44,14 @@ export function SortableTaskCard({ task, onEdit }: SortableTaskCardProps) {
       {...attributes}
       {...listeners}
     >
-      <TaskCard task={task} isDragging={isDragging} onEdit={onEdit} />
+      <TaskCard 
+        task={task} 
+        isDragging={isDragging} 
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onSetActive={onSetActive}
+        onMoveTask={onMoveTask}
+      />
     </div>
   );
 }

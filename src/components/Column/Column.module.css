@@ -5,6 +5,19 @@
   min-height: 400px;
 }
 
+.columnActive {
+  animation: columnPulse 0.3s ease;
+}
+
+@keyframes columnPulse {
+  0%, 100% { 
+    transform: scale(1);
+  }
+  50% { 
+    transform: scale(1.02);
+  }
+}
+
 .header {
   display: flex;
   flex-direction: column;
@@ -118,6 +131,138 @@
   border-radius: var(--radius);
 }
 
+/* Pull to Refresh Styles */
+.pullIndicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3);
+  gap: var(--space-2);
+}
+
+.pullArrow {
+  width: 24px;
+  height: 24px;
+  color: var(--chroma-blue);
+  transition: transform 0.2s ease;
+}
+
+.pullArrow svg {
+  width: 100%;
+  height: 100%;
+}
+
+.pullText {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.pullReady .pullArrow {
+  color: var(--chroma-green);
+}
+
+.pullReady .pullText {
+  color: var(--chroma-green);
+}
+
+/* Chromolume Spinner */
+.refreshOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.spinnerContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.chromolumeSpinner {
+  position: relative;
+  width: 48px;
+  height: 48px;
+}
+
+.spinnerRing {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  animation: spin 1s linear infinite;
+}
+
+.spinnerRing[data-color="blue"] {
+  border-top-color: var(--chroma-blue);
+  animation-duration: 1s;
+}
+
+.spinnerRing[data-color="green"] {
+  border-right-color: var(--chroma-green);
+  animation-duration: 1.2s;
+  animation-direction: reverse;
+  inset: 4px;
+}
+
+.spinnerRing[data-color="purple"] {
+  border-bottom-color: var(--chroma-purple);
+  animation-duration: 0.8s;
+  inset: 8px;
+}
+
+.spinnerRing[data-color="orange"] {
+  border-left-color: var(--chroma-orange);
+  animation-duration: 1.4s;
+  animation-direction: reverse;
+  inset: 12px;
+}
+
+.spinnerCore {
+  position: absolute;
+  inset: 16px;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    var(--chroma-blue) 0%,
+    var(--chroma-green) 33%,
+    var(--chroma-purple) 66%,
+    var(--chroma-orange) 100%
+  );
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.7;
+    transform: scale(0.9);
+  }
+}
+
+.spinnerText {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
 .addButton {
   margin-top: var(--space-2);
   padding: var(--space-3) var(--space-2);
@@ -131,12 +276,42 @@
   transition: var(--transition);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-2);
+  min-height: 44px;
+  position: relative;
+  overflow: hidden;
+}
+
+.addButton svg {
+  width: 16px;
+  height: 16px;
 }
 
 .addButton:hover {
   background: var(--chroma-green-muted);
   color: var(--chroma-green);
+}
+
+.addButton:active {
+  transform: scale(0.98);
+}
+
+/* Touch ripple for add button */
+.addButton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%), 
+    rgba(90, 154, 232, 0.3) 0%, 
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.addButton:active::after {
+  opacity: 1;
 }
 
 .emptyState {
@@ -211,4 +386,44 @@
 @keyframes skeleton-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .column {
+    max-height: calc(100vh - 140px);
+    min-height: auto;
+  }
+  
+  .header {
+    padding: var(--space-2) 0;
+  }
+  
+  .title {
+    font-size: var(--text-sm);
+  }
+  
+  .taskList {
+    gap: var(--space-2);
+    padding: 0;
+  }
+  
+  .addButton {
+    padding: var(--space-3);
+    min-height: 48px;
+    font-size: var(--text-base);
+  }
+  
+  .addButton svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .emptyState {
+    padding: var(--space-2) 0;
+  }
+  
+  .emptyStateCard {
+    padding: var(--space-4) var(--space-3);
+  }
 }

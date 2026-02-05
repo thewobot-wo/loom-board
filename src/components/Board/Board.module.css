@@ -2,6 +2,7 @@
   padding: var(--space-4) var(--space-5);
   max-width: 1800px;
   margin: 0 auto;
+  overflow-x: hidden;
 }
 
 .board {
@@ -19,6 +20,7 @@
 @media (max-width: 768px) {
   .container {
     padding: var(--space-3);
+    padding-bottom: 100px; /* Space for mobile nav */
   }
   
   .board {
@@ -102,4 +104,151 @@
     transparent 70%
   );
   filter: blur(8px);
+}
+
+/* Mobile Single Column View */
+.mobileBoard {
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobileBoard.transitioning {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobileColumn {
+  flex: 0 0 100%;
+  width: 100%;
+  min-width: 100%;
+  padding: 0 var(--space-2);
+  opacity: 0.5;
+  transform: scale(0.95);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.mobileColumn.activeColumn {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Mobile Navigation */
+.mobileNav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(250, 248, 245, 0.95) 20%,
+    rgba(250, 248, 245, 0.98) 100%
+  );
+  backdrop-filter: blur(12px);
+  padding: var(--space-3) var(--space-4);
+  padding-bottom: max(var(--space-4), env(safe-area-inset-bottom));
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.mobileNavDots {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.mobileNavDot {
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2);
+  border-radius: var(--radius);
+  transition: background 0.15s ease;
+}
+
+.mobileNavDot:active {
+  background: rgba(138, 125, 112, 0.1);
+}
+
+.mobileNavDotIndicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(138, 125, 112, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobileNavDotActive .mobileNavDotIndicator {
+  width: 24px;
+  border-radius: var(--radius-full);
+  background: var(--chroma-blue);
+}
+
+.mobileNavLabels {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.mobileNavLabel {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mobileNavCount {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* Swipe Hint */
+.swipeHint {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  box-shadow: 
+    0 2px 8px rgba(45, 40, 36, 0.08),
+    0 1px 2px rgba(45, 40, 36, 0.04);
+  backdrop-filter: blur(8px);
+  animation: hintPulse 2s ease-in-out infinite;
+  z-index: 50;
+}
+
+.swipeHint svg {
+  width: 14px;
+  height: 14px;
+}
+
+@keyframes hintPulse {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Hide swipe hint after interaction */
+.container:has(.mobileNav:active) .swipeHint,
+.container:has(.mobileColumn:active) .swipeHint {
+  display: none;
 }

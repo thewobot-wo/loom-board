@@ -10,6 +10,7 @@ export interface TaskUpdates {
   tags?: string[];
   dueDate?: number;
   order?: number;
+  isActive?: boolean;
 }
 
 export function useTaskMutations() {
@@ -37,7 +38,7 @@ export function useTaskMutations() {
   const createTask = useMutation(api.tasks.createTask);
 
   // Archive task with optimistic update
-  const archiveTask = useMutation(api.tasks.archiveTask).withOptimisticUpdate(
+  const deleteTask = useMutation(api.tasks.archiveTask).withOptimisticUpdate(
     (localStore, args) => {
       const currentTasks = localStore.getQuery(api.tasks.listTasks, {});
       if (currentTasks === undefined) return;
@@ -51,10 +52,50 @@ export function useTaskMutations() {
   // Restore task (no optimistic update - task not in current list)
   const restoreTask = useMutation(api.tasks.restoreTask);
 
+  // Set task as active with optimistic update
+  const setActiveTask = useMutation(api.tasks.setActiveTask).withOptimisticUpdate(
+    (localStore, args) => {
+      const currentTasks = localStore.getQuery(api.tasks.listTasks, {});
+      if (currentTasks === undefined) return;
+
+      // Find the task and set it as active, deactivate others
+      const updatedTasks = currentTasks.map((task) => {
+        if (task._id === args.id) {
+          return { ...task, isActive: true, updatedAt: Date.now() };
+        }
+        // Deactivate all other tasks
+        return task.isActive 
+          ? { ...task, isActive: false, updatedAt: Date.now() }
+          : task;
+      });
+
+      localStore.setQuery(api.tasks.listTasks, {}, updatedTasks);
+    }
+  );
+
+  // Clear active task with optimistic update
+  const clearActiveTask = useMutation(api.tasks.clearActiveTask).withOptimisticUpdate(
+    (localStore) => {
+      const currentTasks = localStore.getQuery(api.tasks.listTasks, {});
+      if (currentTasks === undefined) return;
+
+      // Deactivate all tasks
+      const updatedTasks = currentTasks.map((task) =>
+        task.isActive 
+          ? { ...task, isActive: false, updatedAt: Date.now() }
+          : task
+      );
+
+      localStore.setQuery(api.tasks.listTasks, {}, updatedTasks);
+    }
+  );
+
   return {
     updateTask,
     createTask,
-    archiveTask,
+    deleteTask,
     restoreTask,
+    setActiveTask,
+    clearActiveTask,
   };
 }

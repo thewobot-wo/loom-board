@@ -4,3 +4,12 @@ export { useFilters } from "./useFilters";
 export type { FilterState } from "./useFilters";
 export { useAutoArchive } from "./useAutoArchive";
 export { useKeyboardShortcuts } from "./useKeyboardShortcuts";
+export {
+  useIsMobile,
+  useMobileNavigation,
+  useCardSwipe,
+  useLongPress,
+  usePullToRefresh,
+  useRipple,
+  getAdjacentStatus,
+} from "./useMobileGestures";

@@ -3,9 +3,11 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import clsx from "clsx";
 import type { Doc } from "../../../convex/_generated/dataModel";
 import { STATUS_CONFIG, type Status } from "@/lib/constants";
 import { SortableTaskCard } from "@/components/Task";
+import { usePullToRefresh, useIsMobile } from "@/hooks";
 import styles from "./Column.module.css";
 
 interface ColumnProps {
@@ -13,11 +15,76 @@ interface ColumnProps {
   tasks: Doc<"tasks">[];
   onAddTask?: (status: Status) => void;
   onEditTask?: (taskId: string) => void;
+  onDeleteTask?: (taskId: string) => void;
+  onSetActiveTask?: (taskId: string) => void;
+  onMoveTask?: (taskId: string, newStatus: Status) => void;
+  onRefresh?: () => Promise<void>;
+  isActive?: boolean;
 }
 
-export function Column({ status, tasks, onAddTask, onEditTask }: ColumnProps) {
+// Chromolume loading spinner component
+function ChromolumeSpinner() {
+  return (
+    <div className={styles.spinnerContainer}>
+      <div className={styles.chromolumeSpinner}>
+        <div className={styles.spinnerRing} data-color="blue" />
+        <div className={styles.spinnerRing} data-color="green" />
+        <div className={styles.spinnerRing} data-color="purple" />
+        <div className={styles.spinnerRing} data-color="orange" />
+        <div className={styles.spinnerCore} />
+      </div>
+      <span className={styles.spinnerText}>Syncing...</span>
+    </div>
+  );
+}
+
+// Pull indicator component
+function PullIndicator({ distance }: { distance: number }) {
+  const progress = Math.min(distance / 60, 1);
+  const isReady = distance >= 60;
+  
+  return (
+    <div 
+      className={clsx(
+        styles.pullIndicator,
+        isReady && styles.pullReady
+      )}
+      style={{
+        opacity: progress,
+        transform: `translateY(${(1 - progress) * -20}px)`,
+      }}
+    >
+      <div 
+        className={styles.pullArrow}
+        style={{
+          transform: `rotate(${progress * 180}deg)`,
+        }}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </div>
+      <span className={styles.pullText}>
+        {isReady ? "Release to refresh" : "Pull to refresh"}
+      </span>
+    </div>
+  );
+}
+
+export function Column({ 
+  status, 
+  tasks, 
+  onAddTask, 
+  onEditTask,
+  onDeleteTask,
+  onSetActiveTask,
+  onMoveTask,
+  onRefresh,
+  isActive,
+}: ColumnProps) {
   const config = STATUS_CONFIG[status];
   const showAddButton = status !== "done";
+  const isMobile = useIsMobile();
 
   const { setNodeRef, isOver } = useDroppable({
     id: status,
@@ -35,8 +102,25 @@ export function Column({ status, tasks, onAddTask, onEditTask }: ColumnProps) {
   const totalTasks = tasks.length;
   const progressPercent = totalTasks > 0 ? Math.min((totalTasks / 10) * 100, 100) : 0;
 
+  // Pull to refresh setup
+  const { 
+    containerRef, 
+    pullState, 
+    handleTouchStart, 
+    handleTouchMove, 
+    handleTouchEnd 
+  } = usePullToRefresh(async () => {
+    await onRefresh?.();
+  }, isMobile);
+
+  // Combine refs for droppable and pull-to-refresh
+  const setCombinedRef = (element: HTMLDivElement | null) => {
+    setNodeRef(element);
+    (containerRef as React.MutableRefObject<HTMLDivElement | null>).current = element;
+  };
+
   return (
-    <div className={styles.column}>
+    <div className={clsx(styles.column, isActive && styles.columnActive)}>
       <div className={styles.header}>
         <div className={styles.headerTop}>
           <span
@@ -93,13 +177,41 @@ export function Column({ status, tasks, onAddTask, onEditTask }: ColumnProps) {
         )}
       </div>
 
+      {/* Pull to refresh indicator */}
+      {isMobile && pullState.isPulling && !pullState.isRefreshing && (
+        <PullIndicator distance={pullState.pullDistance} />
+      )}
+
+      {/* Refreshing spinner */}
+      {pullState.isRefreshing && (
+        <div className={styles.refreshOverlay}>
+          <ChromolumeSpinner />
+        </div>
+      )}
+
       <div
-        ref={setNodeRef}
-        className={`${styles.taskList} ${isOver ? styles.dragOver : ""}`}
+        ref={setCombinedRef}
+        className={clsx(styles.taskList, isOver && styles.dragOver)}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{
+          transform: pullState.isPulling 
+            ? `translateY(${pullState.pullDistance}px)` 
+            : undefined,
+          transition: pullState.isPulling ? 'none' : 'transform 0.3s ease',
+        }}
       >
         <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
           {tasks.map((task) => (
-            <SortableTaskCard key={task._id} task={task} onEdit={onEditTask} />
+            <SortableTaskCard 
+              key={task._id} 
+              task={task} 
+              onEdit={onEditTask}
+              onDelete={onDeleteTask}
+              onSetActive={onSetActiveTask}
+              onMoveTask={onMoveTask}
+            />
           ))}
         </SortableContext>
 
@@ -158,7 +270,11 @@ export function Column({ status, tasks, onAddTask, onEditTask }: ColumnProps) {
           className={styles.addButton}
           onClick={() => onAddTask?.(status)}
         >
-          + Add Task
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Add Task
         </button>
       )}
     </div>
