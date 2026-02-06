@@ -3,8 +3,18 @@ import clsx from "clsx";
 import type { Doc } from "../../../convex/_generated/dataModel";
 import { TAG_COLORS, STATUS_CONFIG, type Status } from "@/lib/constants";
 import { formatDate, isOverdue, isDueSoon } from "@/lib/utils";
-import { useCardSwipe, useLongPress, useRipple, useIsMobile, getAdjacentStatus } from "@/hooks";
+import { 
+  useCardSwipe, 
+  useLongPress, 
+  useRipple, 
+  useIsMobile, 
+  getAdjacentStatus,
+  triggerTaskHaptic,
+  triggerPriorityHaptic,
+  triggerStatusChangeHaptic,
+} from "@/hooks";
 import { TaskContextMenu } from "./TaskContextMenu";
+import { TimeDisplay } from "./TimeDisplay";
 import styles from "./TaskCard.module.css";
 
 interface TaskCardProps {
@@ -39,11 +49,15 @@ function TaskCardComponent({
   const priorityClass = priorityClasses[task.priority];
   const defaultColors = { bg: "rgba(59, 130, 246, 0.15)", text: "var(--accent-blue)" };
 
-  // Handle card movement via swipe
+  // Handle card movement via swipe with haptics
   const handleMoveLeft = useCallback(() => {
     const prevStatus = getAdjacentStatus(task.status as Status, "prev");
     if (prevStatus) {
       onMoveTask?.(task._id, prevStatus);
+      triggerStatusChangeHaptic(prevStatus);
+    } else {
+      // Can't move further - warning haptic
+      triggerTaskHaptic("longPressStart");
     }
   }, [task._id, task.status, onMoveTask]);
 
@@ -51,6 +65,14 @@ function TaskCardComponent({
     const nextStatus = getAdjacentStatus(task.status as Status, "next");
     if (nextStatus) {
       onMoveTask?.(task._id, nextStatus);
+      triggerStatusChangeHaptic(nextStatus);
+      // If moved to done, trigger celebration
+      if (nextStatus === "done") {
+        triggerTaskHaptic("taskCompleted");
+      }
+    } else {
+      // Can't move further - warning haptic
+      triggerTaskHaptic("longPressStart");
     }
   }, [task._id, task.status, onMoveTask]);
 
@@ -62,7 +84,8 @@ function TaskCardComponent({
   } = useCardSwipe(
     handleMoveLeft,
     handleMoveRight,
-    isMobile
+    isMobile,
+    task.status as Status
   );
 
   // Long press for context menu (mobile only)
@@ -271,6 +294,15 @@ function TaskCardComponent({
                 );
               })}
             </div>
+
+            <TimeDisplay
+              timeSpentMs={task.timeSpentMs}
+              lastResumedAt={task.lastResumedAt}
+              startedAt={task.startedAt}
+              completedAt={task.completedAt}
+              status={task.status}
+              compact
+            />
             
             {task.dueDate && (
               <span

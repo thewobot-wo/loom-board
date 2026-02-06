@@ -3,6 +3,64 @@ import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { statusValidator, priorityValidator } from "./schema";
 
+// --- Time Tracking Helpers ---
+
+/** Accumulate elapsed time for a task that's being paused/stopped */
+function computeAccumulatedTime(task: { timeSpentMs?: number; lastResumedAt?: number }): {
+  timeSpentMs: number;
+  lastResumedAt: undefined;
+} {
+  const now = Date.now();
+  const elapsed = task.lastResumedAt ? now - task.lastResumedAt : 0;
+  return {
+    timeSpentMs: (task.timeSpentMs ?? 0) + elapsed,
+    lastResumedAt: undefined,
+  };
+}
+
+/** Build time tracking fields for a status transition */
+function getTimeTrackingUpdates(
+  existing: { status: string; startedAt?: number; lastResumedAt?: number; timeSpentMs?: number; completedAt?: number },
+  newStatus: string
+): Record<string, number | undefined> {
+  const updates: Record<string, number | undefined> = {};
+  const now = Date.now();
+  const oldStatus = existing.status;
+
+  if (oldStatus === newStatus) return updates;
+
+  // Leaving in_progress — pause the timer
+  if (oldStatus === "in_progress" && newStatus !== "in_progress") {
+    const elapsed = existing.lastResumedAt ? now - existing.lastResumedAt : 0;
+    updates.timeSpentMs = (existing.timeSpentMs ?? 0) + elapsed;
+    updates.lastResumedAt = undefined;
+  }
+
+  // Entering in_progress — start/resume the timer
+  if (newStatus === "in_progress") {
+    if (!existing.startedAt) {
+      updates.startedAt = now;
+    }
+    updates.lastResumedAt = now;
+    // Clear completedAt if moving back from done
+    if (existing.completedAt) {
+      updates.completedAt = undefined;
+    }
+  }
+
+  // Moving to done — set completedAt
+  if (newStatus === "done") {
+    updates.completedAt = now;
+  }
+
+  // Moving away from done — clear completedAt
+  if (oldStatus === "done" && newStatus !== "done") {
+    updates.completedAt = undefined;
+  }
+
+  return updates;
+}
+
 // CREATE: Returns full task object with all fields (auth required, auto-assigns userId)
 export const createTask = mutation({
   args: {
@@ -24,6 +82,15 @@ export const createTask = mutation({
     }
 
     const now = Date.now();
+    // Time tracking: if created directly as in_progress, set startedAt and lastResumedAt
+    const timeFields: Record<string, number | undefined> = {};
+    if (args.status === "in_progress") {
+      timeFields.startedAt = now;
+      timeFields.lastResumedAt = now;
+    } else if (args.status === "done") {
+      timeFields.completedAt = now;
+    }
+
     const taskId = await ctx.db.insert("tasks", {
       ...args,
       title: args.title.trim(),
@@ -31,6 +98,7 @@ export const createTask = mutation({
       updatedAt: now,
       userId, // Auto-assign to authenticated user
       isActive: false, // Default to not active
+      ...timeFields,
     });
 
     // Log creation in activity history
@@ -153,6 +221,12 @@ export const updateTask = mutation({
       }
     }
 
+    // Time tracking: handle status transitions
+    if (args.updates.status && args.updates.status !== existing.status) {
+      const timeUpdates = getTimeTrackingUpdates(existing, args.updates.status);
+      Object.assign(cleanUpdates, timeUpdates);
+    }
+
     await ctx.db.patch(args.id, cleanUpdates);
     return await ctx.db.get(args.id);
   },
@@ -203,6 +277,9 @@ export const restoreTask = mutation({
       archived: false,
       status: "backlog", // Restored tasks go to backlog
       updatedAt: Date.now(),
+      // Clear time tracking state since task goes back to backlog
+      lastResumedAt: undefined,
+      completedAt: undefined,
     });
 
     // Log restore action
@@ -275,11 +352,18 @@ export const setActiveTask = mutation({
       ))
       .collect();
 
+    const now = Date.now();
     for (const activeTask of currentlyActive) {
       if (activeTask._id !== args.id) {
+        // Pause timer if the previous active task was in_progress
+        const timeUpdates = activeTask.status === "in_progress" && activeTask.lastResumedAt
+          ? computeAccumulatedTime(activeTask)
+          : {};
+
         await ctx.db.patch(activeTask._id, {
           isActive: false,
-          updatedAt: Date.now(),
+          updatedAt: now,
+          ...timeUpdates,
         });
 
         // Log deactivation
@@ -293,11 +377,19 @@ export const setActiveTask = mutation({
       }
     }
 
-    // Activate the new task
-    await ctx.db.patch(args.id, {
+    // Activate the new task — resume timer if it's in_progress
+    const activateUpdates: Record<string, any> = {
       isActive: true,
-      updatedAt: Date.now(),
-    });
+      updatedAt: now,
+    };
+    if (task.status === "in_progress" && !task.lastResumedAt) {
+      activateUpdates.lastResumedAt = now;
+      if (!task.startedAt) {
+        activateUpdates.startedAt = now;
+      }
+    }
+
+    await ctx.db.patch(args.id, activateUpdates);
 
     // Log activation
     await ctx.db.insert("activity_history", {
@@ -328,10 +420,17 @@ export const clearActiveTask = mutation({
       ))
       .collect();
 
+    const now = Date.now();
     for (const task of currentlyActive) {
+      // Pause timer if the task was in_progress
+      const timeUpdates = task.status === "in_progress" && task.lastResumedAt
+        ? computeAccumulatedTime(task)
+        : {};
+
       await ctx.db.patch(task._id, {
         isActive: false,
-        updatedAt: Date.now(),
+        updatedAt: now,
+        ...timeUpdates,
       });
 
       // Log deactivation

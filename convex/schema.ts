@@ -32,6 +32,11 @@ export default defineSchema({
     updatedAt: v.number(), // manual timestamp (ms since epoch)
     userId: v.optional(v.id("users")), // owner of the task (optional for migration)
     isActive: v.optional(v.boolean()), // currently being worked on
+    // Time tracking fields
+    startedAt: v.optional(v.number()), // timestamp when first moved to in_progress
+    completedAt: v.optional(v.number()), // timestamp when moved to done
+    timeSpentMs: v.optional(v.number()), // accumulated time in milliseconds
+    lastResumedAt: v.optional(v.number()), // when the timer was last started/resumed
     // Note: _id and _creationTime are automatic from Convex
   })
     // Compound index for querying by status with order

@@ -5,6 +5,7 @@ import { api } from "../../../convex/_generated/api";
 import type { Doc } from "../../../convex/_generated/dataModel";
 import { PRIORITY_CONFIG, type Status, type Priority } from "@/lib/constants";
 import clsx from "clsx";
+import { TimeDisplay } from "./TimeDisplay";
 import styles from "./TaskModal.module.css";
 
 interface TaskModalProps {
@@ -222,6 +223,21 @@ export function TaskModal({ isOpen, onClose, task, defaultStatus = "backlog" }: 
               )}
             </div>
           </div>
+
+          {/* Time tracking info (edit mode only, when task has time data) */}
+          {isEditing && task && (task.timeSpentMs || task.lastResumedAt || task.startedAt || task.completedAt) && (
+            <div className={styles.formGroup}>
+              <label>Time Tracking</label>
+              <TimeDisplay
+                timeSpentMs={task.timeSpentMs}
+                lastResumedAt={task.lastResumedAt}
+                startedAt={task.startedAt}
+                completedAt={task.completedAt}
+                status={task.status}
+                compact={false}
+              />
+            </div>
+          )}
         </div>
 
         <div className={styles.footer}>

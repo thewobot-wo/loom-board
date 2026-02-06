@@ -48,6 +48,82 @@ function formatDate(timestamp: number): string {
   }).format(new Date(timestamp));
 }
 
+function formatDurationMs(ms: number): string {
+  if (ms < 60_000) return "<1m";
+  const totalMinutes = Math.floor(ms / 60_000);
+  if (totalMinutes < 60) return `${totalMinutes}m`;
+  const hours = Math.floor(totalMinutes / 60);
+  const mins = totalMinutes % 60;
+  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+}
+
+function formatRelativeTime(timestamp: number): string {
+  const now = Date.now();
+  const diffMs = now - timestamp;
+  const diffMinutes = Math.floor(diffMs / 60_000);
+  if (diffMinutes < 1) return "just now";
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays}d ago`;
+}
+
+/** Accumulate elapsed time for a task that's being paused/stopped */
+function computeAccumulatedTime(task: { timeSpentMs?: number; lastResumedAt?: number }): {
+  timeSpentMs: number;
+  lastResumedAt: undefined;
+} {
+  const now = Date.now();
+  const elapsed = task.lastResumedAt ? now - task.lastResumedAt : 0;
+  return {
+    timeSpentMs: (task.timeSpentMs ?? 0) + elapsed,
+    lastResumedAt: undefined,
+  };
+}
+
+/** Build time tracking fields for a status transition */
+function getTimeTrackingUpdates(
+  existing: { status: string; startedAt?: number; lastResumedAt?: number; timeSpentMs?: number; completedAt?: number },
+  newStatus: string
+): Record<string, number | undefined> {
+  const updates: Record<string, number | undefined> = {};
+  const now = Date.now();
+  const oldStatus = existing.status;
+
+  if (oldStatus === newStatus) return updates;
+
+  // Leaving in_progress — pause the timer
+  if (oldStatus === "in_progress" && newStatus !== "in_progress") {
+    const elapsed = existing.lastResumedAt ? now - existing.lastResumedAt : 0;
+    updates.timeSpentMs = (existing.timeSpentMs ?? 0) + elapsed;
+    updates.lastResumedAt = undefined;
+  }
+
+  // Entering in_progress — start/resume the timer
+  if (newStatus === "in_progress") {
+    if (!existing.startedAt) {
+      updates.startedAt = now;
+    }
+    updates.lastResumedAt = now;
+    if (existing.completedAt) {
+      updates.completedAt = undefined;
+    }
+  }
+
+  // Moving to done — set completedAt
+  if (newStatus === "done") {
+    updates.completedAt = now;
+  }
+
+  // Moving away from done — clear completedAt
+  if (oldStatus === "done" && newStatus !== "done") {
+    updates.completedAt = undefined;
+  }
+
+  return updates;
+}
+
 type TaskDoc = {
   _id: Id<"tasks">;
   _creationTime: number;
@@ -62,9 +138,19 @@ type TaskDoc = {
   updatedAt: number;
   userId?: Id<"users">;
   isActive?: boolean;
+  startedAt?: number;
+  completedAt?: number;
+  timeSpentMs?: number;
+  lastResumedAt?: number;
 };
 
 function formatTask(task: TaskDoc) {
+  // Calculate current total time (including running timer if applicable)
+  let totalTimeMs = task.timeSpentMs ?? 0;
+  if (task.lastResumedAt) {
+    totalTimeMs += Date.now() - task.lastResumedAt;
+  }
+
   return {
     id: task._id,
     title: task.title,
@@ -79,6 +165,17 @@ function formatTask(task: TaskDoc) {
     isActive: task.isActive ?? false,
     createdAt: formatDate(task._creationTime),
     updatedAt: formatDate(task.updatedAt),
+    // Time tracking
+    startedAt: task.startedAt ? formatDate(task.startedAt) : null,
+    startedAtTimestamp: task.startedAt ?? null,
+    startedAtRelative: task.startedAt ? formatRelativeTime(task.startedAt) : null,
+    completedAt: task.completedAt ? formatDate(task.completedAt) : null,
+    completedAtTimestamp: task.completedAt ?? null,
+    completedAtRelative: task.completedAt ? formatRelativeTime(task.completedAt) : null,
+    timeSpentMs: task.timeSpentMs ?? 0,
+    timeSpent: totalTimeMs > 0 ? formatDurationMs(totalTimeMs) : null,
+    lastResumedAt: task.lastResumedAt ?? null,
+    timerRunning: !!task.lastResumedAt,
   };
 }
 
@@ -152,6 +249,15 @@ export const createTaskInternal = internalMutation({
     );
 
     const now = Date.now();
+    // Time tracking: if created directly as in_progress or done
+    const timeFields: Record<string, number | undefined> = {};
+    if (args.status === "in_progress") {
+      timeFields.startedAt = now;
+      timeFields.lastResumedAt = now;
+    } else if (args.status === "done") {
+      timeFields.completedAt = now;
+    }
+
     const taskId = await ctx.db.insert("tasks", {
       title: args.title,
       description: args.description,
@@ -164,6 +270,7 @@ export const createTaskInternal = internalMutation({
       updatedAt: now,
       userId: args.userId,
       isActive: false,
+      ...timeFields,
     });
 
     // Log creation in activity history
@@ -221,6 +328,12 @@ export const updateTaskInternal = internalMutation({
       if (value !== undefined) {
         cleanUpdates[key] = key === "title" ? (value as string).trim() : value;
       }
+    }
+
+    // Time tracking: handle status transitions
+    if (args.updates.status && args.updates.status !== existing.status) {
+      const timeUpdates = getTimeTrackingUpdates(existing, args.updates.status);
+      Object.assign(cleanUpdates, timeUpdates);
     }
 
     await ctx.db.patch(taskId, cleanUpdates);
@@ -428,20 +541,35 @@ export const setActiveTaskInternal = internalMutation({
       ))
       .collect();
 
+    const now = Date.now();
     for (const activeTask of currentlyActive) {
       if (activeTask._id !== taskId) {
+        // Pause timer if the previous active task was in_progress
+        const timeUpdates = activeTask.status === "in_progress" && activeTask.lastResumedAt
+          ? computeAccumulatedTime(activeTask)
+          : {};
+
         await ctx.db.patch(activeTask._id, {
           isActive: false,
-          updatedAt: Date.now(),
+          updatedAt: now,
+          ...timeUpdates,
         });
       }
     }
 
-    // Activate the new task
-    await ctx.db.patch(taskId, {
+    // Activate the new task — resume timer if it's in_progress
+    const activateUpdates: Record<string, any> = {
       isActive: true,
-      updatedAt: Date.now(),
-    });
+      updatedAt: now,
+    };
+    if (task.status === "in_progress" && !task.lastResumedAt) {
+      activateUpdates.lastResumedAt = now;
+      if (!task.startedAt) {
+        activateUpdates.startedAt = now;
+      }
+    }
+
+    await ctx.db.patch(taskId, activateUpdates);
 
     const updatedTask = await ctx.db.get(taskId);
     return updatedTask!;
@@ -460,10 +588,17 @@ export const clearActiveTaskInternal = internalMutation({
       ))
       .collect();
 
+    const now = Date.now();
     for (const task of currentlyActive) {
+      // Pause timer if the task was in_progress
+      const timeUpdates = task.status === "in_progress" && task.lastResumedAt
+        ? computeAccumulatedTime(task)
+        : {};
+
       await ctx.db.patch(task._id, {
         isActive: false,
-        updatedAt: Date.now(),
+        updatedAt: now,
+        ...timeUpdates,
       });
     }
 
