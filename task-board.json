@@ -1,25 +1,94 @@
 {
   "version": 1,
-  "updatedAt": "2026-02-02T08:15:00-07:00",
+  "updatedAt": "2026-02-05T16:03:00-07:00",
   "status": "active",
-  "currentTask": null,
+  "currentTask": "task-006",
   "columns": {
     "backlog": [
       {
         "id": "task-001",
-        "title": "Build 'In The Park' app",
+        "title": "Build 'The Park' iOS app",
         "tag": "project",
+        "priority": "p1",
         "createdAt": "2026-02-02T08:00:00-07:00",
-        "notes": "Web or mobile app for park-related functionality. Need to define scope with Cris."
+        "notes": "Voice-first, nodule-based interface. Swift/SwiftUI with WebSocket to OpenClaw. Canvas-rendered dynamic UI."
+      },
+      {
+        "id": "task-009",
+        "title": "Design SF Symbol icon set for nodules",
+        "tag": "feature",
+        "priority": "p2",
+        "createdAt": "2026-02-05T15:30:00-07:00",
+        "notes": "Replace emoji with proper SF Symbols and SVGs throughout The Park interface"
+      },
+      {
+        "id": "task-010",
+        "title": "Renew kids' passports (Rooney & Vivy)",
+        "tag": "cruise",
+        "priority": "p1",
+        "createdAt": "2026-02-05T16:03:00-07:00",
+        "dueDate": "2026-02-19",
+        "notes": "Need updated passports for Royal Caribbean cruise (Aug 7-15). Should be done within 2 weeks."
+      },
+      {
+        "id": "task-011",
+        "title": "Universal Orlando check-in",
+        "tag": "project",
+        "priority": "p2",
+        "createdAt": "2026-02-05T16:03:00-07:00",
+        "dueDate": "2026-02-28",
+        "notes": "Check in for Universal Orlando trip (Mar 1-6). Note: kids don't have TSA PreCheck — plan extra airport time."
       }
     ],
-    "in-progress": [],
+    "in-progress": [
+      {
+        "id": "task-006",
+        "title": "Define The Park vision and architecture",
+        "tag": "project",
+        "priority": "p0",
+        "status": "in-progress",
+        "createdAt": "2026-02-05T14:30:00-07:00",
+        "startedAt": "2026-02-05T14:30:00-07:00",
+        "notes": "Brainstorming with Wo: voice-first, nodule-based UI, proactive intelligence, physical+digital organization"
+      },
+      {
+        "id": "task-012",
+        "title": "Inbox monitoring (ongoing)",
+        "tag": "maintenance",
+        "priority": "p1",
+        "status": "in-progress",
+        "createdAt": "2026-02-05T16:03:00-07:00",
+        "startedAt": "2026-02-05T15:33:00-07:00",
+        "notes": "Cron checks /Park/Lesson8/Inbox/ every 60s. Auto-analyze, interview if unclear, file away, document, clear."
+      }
+    ],
     "blocked": [],
     "done": [
+      {
+        "id": "task-007",
+        "title": "Set up Inbox processing system",
+        "tag": "feature",
+        "priority": "p1",
+        "createdAt": "2026-02-05T15:25:00-07:00",
+        "startedAt": "2026-02-05T15:25:00-07:00",
+        "completedAt": "2026-02-05T15:33:00-07:00",
+        "notes": "Cron monitors /Park/Lesson8/Inbox/ every 60s. Auto-analyze, interview if unclear, file away, document in Obsidian, keep inbox empty."
+      },
+      {
+        "id": "task-008",
+        "title": "Process travel bookings from inbox",
+        "tag": "cruise",
+        "priority": "p1",
+        "createdAt": "2026-02-05T15:30:00-07:00",
+        "startedAt": "2026-02-05T15:30:00-07:00",
+        "completedAt": "2026-02-05T15:38:00-07:00",
+        "notes": "Created projects for Universal Orlando (Mar 1-6) and Royal Caribbean cruise (Aug 7-15). Filed PDFs, created READMEs with action items."
+      },
       {
         "id": "task-003",
         "title": "Create Kanban board for task visibility",
         "tag": "feature",
+        "priority": "p1",
         "createdAt": "2026-02-02T08:00:00-07:00",
         "completedAt": "2026-02-02T08:05:00-07:00",
         "notes": "Built loom-board.html with drag-drop, history tracking, import/export"
@@ -28,6 +97,7 @@
         "id": "task-005",
         "title": "Fix the Gateway Auth",
         "tag": "bug",
+        "priority": "p0",
         "createdAt": "2026-02-02T08:11:00-07:00",
         "startedAt": "2026-02-02T08:12:00-07:00",
         "completedAt": "2026-02-02T08:14:00-07:00",
@@ -37,6 +107,7 @@
         "id": "task-002",
         "title": "Set up daily health check cron job",
         "tag": "maintenance",
+        "priority": "p2",
         "createdAt": "2026-02-02T08:00:00-07:00",
         "completedAt": "2026-02-02T08:14:00-07:00",
         "notes": "Runs daily at 8 AM, delivers alerts to Telegram"
@@ -44,6 +115,39 @@
     ]
   },
   "history": [
+    {
+      "timestamp": "2026-02-05T16:03:00-07:00",
+      "action": "Added",
+      "task": "Renew kids' passports (Rooney & Vivy)",
+      "details": "Due Feb 19 — needed for August cruise"
+    },
+    {
+      "timestamp": "2026-02-05T16:03:00-07:00",
+      "action": "Added",
+      "task": "Universal Orlando check-in",
+      "details": "Due Feb 28 — no PreCheck for kids"
+    },
+    {
+      "timestamp": "2026-02-05T16:03:00-07:00",
+      "action": "Added",
+      "task": "Inbox monitoring (ongoing)",
+      "details": "Moved from implicit to tracked — cron running every 60s"
+    },
+    {
+      "timestamp": "2026-02-05T15:38:00-07:00",
+      "action": "Completed",
+      "task": "Process travel bookings from inbox"
+    },
+    {
+      "timestamp": "2026-02-05T15:33:00-07:00",
+      "action": "Completed",
+      "task": "Set up Inbox processing system"
+    },
+    {
+      "timestamp": "2026-02-05T15:30:00-07:00",
+      "action": "Started",
+      "task": "Define The Park vision and architecture"
+    },
     {
       "timestamp": "2026-02-02T08:14:00-07:00",
       "action": "Completed",
@@ -66,16 +170,10 @@
       "details": "Gateway token mismatch prevents cron access"
     },
     {
-      "timestamp": "2026-02-02T08:04:00-07:00",
-      "action": "Identified",
-      "task": "Silent failure handling improvements needed",
-      "details": "Memory search failed due to missing API keys but was not reported clearly"
-    },
-    {
       "timestamp": "2026-02-02T08:00:00-07:00",
       "action": "Requested",
       "task": "Kanban board for task visibility",
-      "details": "Cris wants to see what I'm working on, redirect priorities, see history"
+      "details": "Wo wants to see what I'm working on, redirect priorities, see history"
     }
   ]
 }

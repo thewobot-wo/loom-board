@@ -228,6 +228,10 @@
 
 @media (max-width: 900px) {
   .activeTaskIndicator {
+    margin-left: var(--space-2);
+    max-width: 200px;
+  }
+  .activeTaskLabel {
     display: none;
   }
 }
