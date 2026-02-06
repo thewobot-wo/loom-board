@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import clsx from "clsx";
 import type { Doc } from "../../../convex/_generated/dataModel";
 import { STATUS_CONFIG, COLUMN_ORDER, type Status } from "@/lib/constants";
+import { triggerTaskHaptic, triggerErrorHaptic } from "@/hooks";
 import styles from "./TaskContextMenu.module.css";
 
 interface TaskContextMenuProps {
@@ -36,6 +37,14 @@ export function TaskContextMenu({
     }, 180);
   }, [onClose]);
 
+  // Trigger haptic when menu opens
+  useEffect(() => {
+    if (isOpen) {
+      // Medium pop when context menu opens
+      triggerTaskHaptic("longPressStart");
+    }
+  }, [isOpen]);
+
   // Close on escape key
   useEffect(() => {
     if (!isOpen) return;
@@ -68,6 +77,8 @@ export function TaskContextMenu({
   }, [handleClose, onEdit]);
 
   const handleDelete = useCallback(() => {
+    // Warning buzz for delete confirmation
+    triggerErrorHaptic("deleteConfirmation");
     handleClose();
     setTimeout(onDelete, 200);
   }, [handleClose, onDelete]);
@@ -78,9 +89,23 @@ export function TaskContextMenu({
   }, [handleClose, onSetActive]);
 
   const handleMove = useCallback((status: Status) => {
+    // Satisfying pop when selecting move destination
+    triggerTaskHaptic("taskCreated");
     handleClose();
     setTimeout(() => onMoveTask(status), 200);
   }, [handleClose, onMoveTask]);
+
+  const handleShowMoveOptions = useCallback(() => {
+    // Light tick when opening move options
+    triggerTaskHaptic("taskDeleted");
+    setShowMoveOptions(true);
+  }, []);
+
+  const handleBackFromMoveOptions = useCallback(() => {
+    // Light tick when going back
+    triggerTaskHaptic("taskDeleted");
+    setShowMoveOptions(false);
+  }, []);
 
   const currentIndex = COLUMN_ORDER.indexOf(task.status as Status);
   const availableStatuses = COLUMN_ORDER.filter(
@@ -179,7 +204,7 @@ export function TaskContextMenu({
               {availableStatuses.length > 0 && (
                 <button
                   className={styles.contextMenuItem}
-                  onClick={() => setShowMoveOptions(true)}
+                  onClick={handleShowMoveOptions}
                   aria-label="Move to different column"
                 >
                   <svg
@@ -246,7 +271,7 @@ export function TaskContextMenu({
             <div className={styles.moveOptions}>
               <button
                 className={styles.moveBack}
-                onClick={() => setShowMoveOptions(false)}
+                onClick={handleBackFromMoveOptions}
                 aria-label="Back to main menu"
               >
                 <svg

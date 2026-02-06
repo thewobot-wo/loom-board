@@ -14,7 +14,14 @@ import {
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import type { Doc, Id } from "../../../convex/_generated/dataModel";
 import { COLUMN_ORDER, STATUS_CONFIG, type Status } from "@/lib/constants";
-import { useTaskMutations, useIsMobile, useMobileNavigation } from "@/hooks";
+import { 
+  useTaskMutations, 
+  useIsMobile, 
+  useMobileNavigation,
+  triggerNavigationHaptic,
+  triggerTaskHaptic,
+  triggerStatusChangeHaptic,
+} from "@/hooks";
 import { Column, ColumnSkeleton } from "@/components/Column";
 import { TaskCard } from "@/components/Task";
 import styles from "./Board.module.css";
@@ -114,6 +121,12 @@ export function Board({
           id: taskId,
           updates: { status: targetStatus },
         });
+        // Trigger status change haptic
+        triggerStatusChangeHaptic(targetStatus);
+        // If moved to done, trigger task completed celebration
+        if (targetStatus === "done") {
+          triggerTaskHaptic("taskCompleted");
+        }
       }
     },
     [tasks, updateTask]
@@ -134,6 +147,8 @@ export function Board({
   const handleDeleteTask = useCallback(async (taskId: string) => {
     if (confirm("Are you sure you want to delete this task?")) {
       await deleteTask({ id: taskId as Id<"tasks"> });
+      // Trigger task deleted haptic
+      triggerTaskHaptic("taskDeleted");
     }
   }, [deleteTask]);
 
@@ -243,7 +258,11 @@ export function Board({
                       styles.mobileNavDot,
                       index === currentColumnIndex && styles.mobileNavDotActive
                     )}
-                    onClick={() => goToColumn(index)}
+                    onClick={() => {
+                      // Medium confirmation haptic when tapping nav dot
+                      triggerNavigationHaptic("tapNavDot");
+                      goToColumn(index);
+                    }}
                     aria-label={`Go to ${status}`}
                     aria-current={index === currentColumnIndex ? "true" : undefined}
                   >

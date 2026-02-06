@@ -1,18 +1,17 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { COLUMN_ORDER, type Status } from "@/lib/constants";
+import {
+  triggerLegacyHaptic,
+  triggerGeneralHaptic,
+  triggerColumnHaptic,
+  triggerNavigationHaptic,
+  triggerTaskHaptic,
+  triggerErrorHaptic,
+  triggerStatusChangeHaptic,
+} from "./useHaptics";
 
-// Haptic feedback helper
-export const triggerHaptic = (type: "light" | "medium" | "heavy" | "success" = "light") => {
-  if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-    const patterns = {
-      light: 10,
-      medium: 25,
-      heavy: 35,
-      success: [10, 50, 10],
-    };
-    navigator.vibrate(patterns[type] as number | number[]);
-  }
-};
+// Re-export for backward compatibility
+export { triggerLegacyHaptic as triggerHaptic };
 
 // Detect mobile screen
 export const useIsMobile = () => {
@@ -31,29 +30,56 @@ export const useIsMobile = () => {
   return isMobile;
 };
 
-// Single column mobile navigation
+// Single column mobile navigation with enhanced haptics
 export const useMobileNavigation = () => {
   const [currentColumnIndex, setCurrentColumnIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
   const isSwiping = useRef(false);
+  const lastColumnIndex = useRef(0);
 
   const goToColumn = useCallback((index: number) => {
     if (index >= 0 && index < COLUMN_ORDER.length && !isTransitioning) {
       setIsTransitioning(true);
+      
+      // Track if this is a navigation change
+      const isNavigating = index !== lastColumnIndex.current;
+      lastColumnIndex.current = index;
+      
       setCurrentColumnIndex(index);
-      triggerHaptic("light");
+      
+      // Trigger appropriate haptic based on target column
+      if (isNavigating) {
+        const targetColumn = COLUMN_ORDER[index];
+        if (targetColumn) {
+          triggerColumnHaptic(targetColumn as "backlog" | "inProgress" | "blocked" | "done");
+        }
+      }
+      
       setTimeout(() => setIsTransitioning(false), 300);
+    } else if ((index < 0 || index >= COLUMN_ORDER.length) && !isTransitioning) {
+      // Can't move further - trigger error haptic
+      triggerErrorHaptic("cantMoveFurther");
     }
   }, [isTransitioning]);
 
   const goToNextColumn = useCallback(() => {
-    goToColumn(currentColumnIndex + 1);
+    if (currentColumnIndex < COLUMN_ORDER.length - 1) {
+      goToColumn(currentColumnIndex + 1);
+    } else {
+      // At right edge - can't move further
+      triggerErrorHaptic("cantMoveFurther");
+    }
   }, [currentColumnIndex, goToColumn]);
 
   const goToPrevColumn = useCallback(() => {
-    goToColumn(currentColumnIndex - 1);
+    if (currentColumnIndex > 0) {
+      goToColumn(currentColumnIndex - 1);
+    } else {
+      // At left edge - can't move further
+      triggerErrorHaptic("cantMoveFurther");
+    }
   }, [currentColumnIndex, goToColumn]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -78,12 +104,24 @@ export const useMobileNavigation = () => {
       isSwiping.current = true;
       
       if (deltaX > 0) {
-        goToNextColumn();
+        // Swiping left (next column)
+        if (currentColumnIndex < COLUMN_ORDER.length - 1) {
+          goToNextColumn();
+        } else {
+          // Can't move further right
+          triggerErrorHaptic("cantMoveFurther");
+        }
       } else {
-        goToPrevColumn();
+        // Swiping right (previous column)
+        if (currentColumnIndex > 0) {
+          goToPrevColumn();
+        } else {
+          // Can't move further left
+          triggerErrorHaptic("cantMoveFurther");
+        }
       }
     }
-  }, [goToNextColumn, goToPrevColumn]);
+  }, [goToNextColumn, goToPrevColumn, currentColumnIndex]);
 
   const handleTouchEnd = useCallback(() => {
     isSwiping.current = false;
@@ -103,7 +141,7 @@ export const useMobileNavigation = () => {
   };
 };
 
-// Swipe to move card
+// Swipe to move card with enhanced haptics
 interface SwipeState {
   deltaX: number;
   isSwiping: boolean;
@@ -114,7 +152,8 @@ interface SwipeState {
 export const useCardSwipe = (
   onMoveLeft: () => void,
   onMoveRight: () => void,
-  enabled: boolean = true
+  enabled: boolean = true,
+  currentStatus?: Status
 ) => {
   const [swipeState, setSwipeState] = useState<SwipeState>({
     deltaX: 0,
@@ -127,6 +166,7 @@ export const useCardSwipe = (
   const touchStartY = useRef(0);
   const isHorizontalSwipe = useRef(false);
   const rafId = useRef<number | null>(null);
+  const hasTriggeredHaptic = useRef(false);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (!enabled) return;
@@ -137,6 +177,7 @@ export const useCardSwipe = (
     touchStartX.current = touch.clientX;
     touchStartY.current = touch.clientY;
     isHorizontalSwipe.current = false;
+    hasTriggeredHaptic.current = false;
     
     setSwipeState(prev => ({ ...prev, isSwiping: false, deltaX: 0, direction: null }));
   }, [enabled]);
@@ -170,6 +211,14 @@ export const useCardSwipe = (
           direction,
           threshold: 100,
         });
+
+        // Trigger tick haptic when crossing threshold
+        if (Math.abs(deltaX) > 100 && !hasTriggeredHaptic.current) {
+          triggerGeneralHaptic("tick");
+          hasTriggeredHaptic.current = true;
+        } else if (Math.abs(deltaX) < 100) {
+          hasTriggeredHaptic.current = false;
+        }
       });
     }
   }, [enabled]);
@@ -185,16 +234,39 @@ export const useCardSwipe = (
     if (Math.abs(deltaX) > threshold) {
       if (deltaX > 0) {
         onMoveRight();
-        triggerHaptic("success");
+        // Trigger status-specific haptic if status provided
+        if (currentStatus) {
+          const currentIndex = COLUMN_ORDER.indexOf(currentStatus);
+          if (currentIndex < COLUMN_ORDER.length - 1) {
+            const nextStatus = COLUMN_ORDER[currentIndex + 1];
+            if (nextStatus) {
+              triggerStatusChangeHaptic(nextStatus);
+            }
+          }
+        } else {
+          triggerGeneralHaptic("success");
+        }
       } else {
         onMoveLeft();
-        triggerHaptic("success");
+        // Trigger status-specific haptic if status provided
+        if (currentStatus) {
+          const currentIndex = COLUMN_ORDER.indexOf(currentStatus);
+          if (currentIndex > 0) {
+            const prevStatus = COLUMN_ORDER[currentIndex - 1];
+            if (prevStatus) {
+              triggerStatusChangeHaptic(prevStatus);
+            }
+          }
+        } else {
+          triggerGeneralHaptic("success");
+        }
       }
     }
 
     setSwipeState(prev => ({ ...prev, isSwiping: false, deltaX: 0, direction: null }));
     isHorizontalSwipe.current = false;
-  }, [enabled, swipeState, onMoveLeft, onMoveRight]);
+    hasTriggeredHaptic.current = false;
+  }, [enabled, swipeState, onMoveLeft, onMoveRight, currentStatus]);
 
   useEffect(() => {
     return () => {
@@ -212,7 +284,7 @@ export const useCardSwipe = (
   };
 };
 
-// Long press for context menu
+// Long press for context menu with enhanced haptics
 interface LongPressProps {
   onTouchStart: (e: React.TouchEvent) => void;
   onTouchMove: (e: React.TouchEvent) => void;
@@ -236,10 +308,12 @@ export const useLongPress = (
   const isLongPress = useRef(false);
   const touchStartPos = useRef({ x: 0, y: 0 });
   const hasTriggeredLongPress = useRef(false);
+  const hasTriggeredStartHaptic = useRef(false);
 
   const start = useCallback((e: React.TouchEvent | React.MouseEvent) => {
     isLongPress.current = false;
     hasTriggeredLongPress.current = false;
+    hasTriggeredStartHaptic.current = false;
     pressStartTime.current = Date.now();
     
     if ("touches" in e && e.touches[0]) {
@@ -250,11 +324,19 @@ export const useLongPress = (
 
     // Trigger visual feedback immediately
     onPressStart?.();
+    
+    // Trigger haptic at start of long press for immediate feedback
+    if ("touches" in e) {
+      triggerTaskHaptic("longPressStart");
+      hasTriggeredStartHaptic.current = true;
+    }
 
     timerRef.current = setTimeout(() => {
       isLongPress.current = true;
       hasTriggeredLongPress.current = true;
-      triggerHaptic("medium");
+      if (!hasTriggeredStartHaptic.current) {
+        triggerTaskHaptic("longPressStart");
+      }
       // End visual feedback when menu opens
       onPressEnd?.();
       onLongPress();
@@ -297,6 +379,7 @@ export const useLongPress = (
       }
     }
     isLongPress.current = false;
+    hasTriggeredStartHaptic.current = false;
   }, [onClick, duration, onPressEnd]);
 
   const cancel = useCallback(() => {
@@ -307,6 +390,7 @@ export const useLongPress = (
     // Always end visual feedback on cancel
     onPressEnd?.();
     isLongPress.current = false;
+    hasTriggeredStartHaptic.current = false;
   }, [onPressEnd]);
 
   return {
@@ -374,7 +458,8 @@ export const usePullToRefresh = (
 
     if (pullState.pullDistance > 60) {
       setPullState(prev => ({ ...prev, isRefreshing: true }));
-      triggerHaptic("medium");
+      // Medium thunk when releasing to refresh
+      triggerNavigationHaptic("pullToRefreshRelease");
       
       try {
         await onRefresh();
