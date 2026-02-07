@@ -1,13 +1,9 @@
 import { memo, useCallback } from "react";
 import clsx from "clsx";
 import type { Doc } from "../../../convex/_generated/dataModel";
-import { TAG_COLORS, STATUS_CONFIG, type Status } from "@/lib/constants";
+import { TAG_COLORS, type Status } from "@/lib/constants";
 import { formatDate, isOverdue, isDueSoon } from "@/lib/utils";
-import { 
-  useIsMobile, 
-  getAdjacentStatus,
-  triggerStatusChangeHaptic,
-} from "@/hooks";
+import { useIsMobile } from "@/hooks";
 import { TimeDisplay } from "./TimeDisplay";
 import styles from "./TaskCard.module.css";
 
@@ -40,23 +36,6 @@ function TaskCardComponent({
   };
   const priorityClass = priorityClasses[task.priority];
   const defaultColors = { bg: "rgba(59, 130, 246, 0.15)", text: "var(--accent-blue)" };
-
-  // Handle card movement (for desktop DnD or context menu)
-  const handleMoveLeft = useCallback(() => {
-    const prevStatus = getAdjacentStatus(task.status as Status, "prev");
-    if (prevStatus) {
-      onMoveTask?.(task._id, prevStatus);
-      triggerStatusChangeHaptic(prevStatus);
-    }
-  }, [task._id, task.status, onMoveTask]);
-
-  const handleMoveRight = useCallback(() => {
-    const nextStatus = getAdjacentStatus(task.status as Status, "next");
-    if (nextStatus) {
-      onMoveTask?.(task._id, nextStatus);
-      triggerStatusChangeHaptic(nextStatus);
-    }
-  }, [task._id, task.status, onMoveTask]);
 
   // Simple click handler - opens edit modal
   const handleClick = useCallback(() => {

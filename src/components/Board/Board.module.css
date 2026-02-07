@@ -17,20 +17,6 @@
   }
 }
 
-@media (max-width: 768px) {
-  .container {
-    padding: var(--space-3);
-    padding-bottom: var(--space-4);
-    overflow-x: hidden;
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .board {
-    display: none; /* Hide desktop grid on mobile */
-  }
-}
-
 .loading {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -40,12 +26,6 @@
 @media (max-width: 1400px) {
   .loading {
     grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .loading {
-    grid-template-columns: 1fr;
   }
 }
 
@@ -110,109 +90,151 @@
 }
 
 /* ===========================================
-   MOBILE VERTICAL STACKED LAYOUT
+   MOBILE TAB BAR LAYOUT
    =========================================== */
 
-.mobileStackedBoard {
+@media (max-width: 768px) {
+  .container {
+    padding: var(--space-3);
+    padding-bottom: 100px; /* Space for tab bar + safe area */
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .board {
+    display: none; /* Hide desktop grid on mobile */
+  }
+
+  .loading {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile Column View - single column takes full height */
+.mobileColumnView {
+  height: calc(100vh - 200px); /* Account for header, banner, tab bar */
+  min-height: 400px;
+}
+
+.mobileColumnView > * {
+  height: 100%;
+}
+
+/* ===========================================
+   BOTTOM TAB BAR
+   =========================================== */
+
+.mobileTabBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: rgba(250, 248, 245, 0.98);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-top: 1px solid rgba(138, 125, 112, 0.1);
+  padding: var(--space-2) var(--space-3);
+  padding-bottom: max(var(--space-3), env(safe-area-inset-bottom));
+  z-index: 100;
+  box-shadow: 
+    0 -4px 20px rgba(45, 40, 36, 0.08),
+    0 -1px 3px rgba(45, 40, 36, 0.04);
+}
+
+.mobileTab {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  padding-bottom: var(--space-4);
-}
-
-/* Column Section */
-.mobileColumnSection {
-  background: rgba(250, 248, 245, 0.6);
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Collapsible Header */
-.mobileColumnHeader {
-  display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: var(--space-3) var(--space-4);
-  background: rgba(250, 248, 245, 0.9);
+  justify-content: center;
+  gap: 4px;
+  min-width: 64px; /* 44pt minimum touch target */
+  min-height: 56px; /* 44pt minimum touch target */
+  padding: var(--space-1) var(--space-2);
+  background: transparent;
   border: none;
+  border-radius: var(--radius);
   cursor: pointer;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  transition: background 0.2s ease;
+  transition: background 0.15s ease;
   -webkit-tap-highlight-color: transparent;
+  flex: 1;
+  max-width: 80px;
 }
 
-.mobileColumnHeader:active {
-  background: rgba(250, 248, 245, 1);
+.mobileTab:active {
+  background: rgba(138, 125, 112, 0.08);
 }
 
-.mobileColumnHeaderLeft {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
+.mobileTabActive {
+  background: rgba(138, 125, 112, 0.05);
 }
 
-.mobileColumnDot {
-  width: 10px;
-  height: 10px;
+.mobileTabDot {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  flex-shrink: 0;
+  margin-bottom: 2px;
+  transition: transform 0.2s ease;
 }
 
-.mobileColumnTitle {
-  font-size: var(--text-sm);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-primary);
+.mobileTabActive .mobileTabDot {
+  transform: scale(1.2);
 }
 
-.mobileColumnCount {
-  font-size: var(--text-xs);
+.mobileTabLabel {
+  font-size: 10px;
   font-weight: 500;
   color: var(--text-muted);
-  background: rgba(138, 125, 112, 0.1);
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  min-width: 24px;
   text-align: center;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
-.mobileColumnChevron {
-  width: 20px;
-  height: 20px;
-  color: var(--text-muted);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.mobileTabActive .mobileTabLabel {
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
-/* Collapsed State */
-.mobileColumnCollapsed .mobileColumnChevron {
-  transform: rotate(-90deg);
+.mobileTabCount {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: rgba(138, 125, 112, 0.15);
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.mobileColumnCollapsed .mobileColumnContent {
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
+.mobileTabActive .mobileTabCount {
+  background: rgba(90, 154, 232, 0.15);
+  color: var(--chroma-blue);
 }
 
-/* Expanded Content */
-.mobileColumnContent {
-  max-height: 2000px; /* Arbitrary large value for animation */
-  opacity: 1;
-  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 0.2s ease;
-}
-
-.mobileColumnContent > * {
-  padding: 0 var(--space-3) var(--space-3);
+/* Active indicator line at top of tab */
+.mobileTabIndicator {
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 3px;
+  border-radius: 0 0 2px 2px;
 }
 
 /* Remove old mobile styles */
+.mobileStackedBoard,
+.mobileColumnSection,
+.mobileColumnHeader,
+.mobileColumnContent,
 .mobileBoard,
 .mobileColumn,
 .mobileNav,
@@ -222,20 +244,43 @@
 
 /* Reduce motion preference */
 @media (prefers-reduced-motion: reduce) {
-  .mobileColumnSection,
-  .mobileColumnHeader,
-  .mobileColumnChevron,
-  .mobileColumnContent {
+  .mobileTab,
+  .mobileTabDot {
     transition: none;
   }
-  
-  .mobileColumnCollapsed .mobileColumnContent {
-    display: none;
+}
+
+/* Landscape mode adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  .mobileColumnView {
+    height: calc(100vh - 160px);
   }
   
-  .mobileColumnSection:not(.mobileColumnCollapsed) .mobileColumnContent {
-    display: block;
-    max-height: none;
-    opacity: 1;
+  .mobileTabBar {
+    padding: var(--space-1) var(--space-3);
+    padding-bottom: max(var(--space-2), env(safe-area-inset-bottom));
+  }
+  
+  .mobileTab {
+    min-height: 44px;
+    flex-direction: row;
+    gap: var(--space-2);
+  }
+  
+  .mobileTabDot {
+    margin-bottom: 0;
+  }
+  
+  .mobileTabLabel {
+    font-size: 12px;
+  }
+  
+  .mobileTabCount {
+    position: static;
+    margin-left: 4px;
+  }
+  
+  .mobileTabIndicator {
+    display: none;
   }
 }
