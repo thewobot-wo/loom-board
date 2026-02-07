@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { api } from "../../../convex/_generated/api";
 import type { Doc, Id } from "../../../convex/_generated/dataModel";
 import { formatDate } from "@/lib/utils";
+import { useIsMobile } from "@/hooks";
 import styles from "./ArchiveSection.module.css";
 
 interface ArchiveSectionProps {
@@ -13,6 +14,7 @@ interface ArchiveSectionProps {
 export function ArchiveSection({ archivedTasks }: ArchiveSectionProps) {
   const [isOpen, setIsOpen] = useState(false);
   const restoreTask = useMutation(api.tasks.restoreTask);
+  const isMobile = useIsMobile();
 
   const handleRestore = useCallback(
     async (taskId: Id<"tasks">) => {
@@ -26,6 +28,11 @@ export function ArchiveSection({ archivedTasks }: ArchiveSectionProps) {
     },
     [restoreTask]
   );
+
+  // Skip render entirely on mobile - not useful in tab bar layout
+  if (isMobile) {
+    return null;
+  }
 
   if (archivedTasks.length === 0) {
     return null;

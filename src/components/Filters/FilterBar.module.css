@@ -93,16 +93,82 @@
   color: var(--priority-urgent);
 }
 
+/* Mobile collapsed search icon button */
+.searchIconButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--text-muted);
+}
+
+.searchIconButton svg {
+  width: 18px;
+  height: 18px;
+}
+
+.searchIconButton:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
+  color: var(--text-secondary);
+}
+
+.searchIconButton:focus-visible {
+  outline: 2px solid var(--chroma-blue);
+  outline-offset: 2px;
+}
+
+/* Active filters indicator dot */
+.filterIndicator {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  background: var(--chroma-blue);
+  border-radius: 50%;
+  border: 2px solid var(--bg-canvas);
+}
+
+/* Mobile responsive */
 @media (max-width: 768px) {
   .filters {
     padding: var(--space-2) var(--space-4);
   }
-  
+
   .searchInput {
     width: 140px;
+    font-size: 16px; /* Prevent iOS auto-zoom */
   }
-  
+
   .searchInput:focus {
     width: 180px;
+  }
+
+  /* Expanded mobile filter bar */
+  .filtersMobileExpanded {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .filtersMobileExpanded .searchContainer {
+    flex: 1;
+    min-width: 140px;
+    margin-right: 0;
+  }
+
+  .filtersMobileExpanded .searchInput {
+    width: 100%;
+  }
+
+  .filtersMobileExpanded .searchInput:focus {
+    width: 100%;
   }
 }

@@ -2,7 +2,6 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useMemo } from "react";
 import type { Doc } from "../../../convex/_generated/dataModel";
-import type { Status } from "@/lib/constants";
 import { useIsMobile } from "@/hooks";
 import { TaskCard } from "./TaskCard";
 import styles from "./TaskCard.module.css";
@@ -10,20 +9,16 @@ import styles from "./TaskCard.module.css";
 interface SortableTaskCardProps {
   task: Doc<"tasks">;
   onEdit?: (taskId: string) => void;
-  onDelete?: (taskId: string) => void;
-  onSetActive?: (taskId: string) => void;
-  onMoveTask?: (taskId: string, newStatus: Status) => void;
+  activeTaskId?: string | null;
 }
 
-export function SortableTaskCard({ 
-  task, 
-  onEdit, 
-  onDelete, 
-  onSetActive, 
-  onMoveTask 
+export function SortableTaskCard({
+  task,
+  onEdit,
+  activeTaskId,
 }: SortableTaskCardProps) {
   const isMobile = useIsMobile();
-  
+
   const {
     attributes,
     listeners,
@@ -31,9 +26,9 @@ export function SortableTaskCard({
     transform,
     transition,
     isDragging,
-  } = useSortable({ 
+  } = useSortable({
     id: task._id,
-    // Disable drag on mobile to allow swipe gestures and long press
+    // Disable drag on mobile to allow tap interactions
     disabled: isMobile,
   });
 
@@ -55,13 +50,11 @@ export function SortableTaskCard({
       {...(!isMobile ? attributes : {})}
       {...(!isMobile ? listeners : {})}
     >
-      <TaskCard 
-        task={task} 
-        isDragging={isDragging} 
+      <TaskCard
+        task={task}
+        isDragging={isDragging}
         onEdit={onEdit}
-        onDelete={onDelete}
-        onSetActive={onSetActive}
-        onMoveTask={onMoveTask}
+        activeTaskId={activeTaskId}
       />
     </div>
   );

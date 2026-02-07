@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import clsx from "clsx";
 import {
   DndContext,
@@ -14,8 +14,8 @@ import {
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import type { Doc, Id } from "../../../convex/_generated/dataModel";
 import { COLUMN_ORDER, STATUS_CONFIG, type Status } from "@/lib/constants";
-import { 
-  useTaskMutations, 
+import {
+  useTaskMutations,
   useIsMobile,
   triggerStatusChangeHaptic,
   triggerTaskHaptic,
@@ -29,31 +29,66 @@ interface BoardProps {
   tasks: Doc<"tasks">[] | undefined;
   onAddTask?: (status: Status) => void;
   onEditTask?: (taskId: string) => void;
-  onDeleteTask?: (taskId: string) => void;
-  onSetActiveTask?: (taskId: string) => void;
   onRefresh?: () => Promise<void>;
+  activeTaskId?: string | null;
+  totalTasksByStatus?: Record<Status, number>;
+  hasActiveFilters?: boolean;
 }
 
-export function Board({ 
-  tasks, 
-  onAddTask, 
+export function Board({
+  tasks,
+  onAddTask,
   onEditTask,
-  onDeleteTask,
-  onSetActiveTask,
   onRefresh,
+  activeTaskId,
+  totalTasksByStatus,
+  hasActiveFilters = false,
 }: BoardProps) {
-  const { updateTask, deleteTask, setActiveTask, clearActiveTask } = useTaskMutations();
+  const { updateTask } = useTaskMutations();
   const [draggingTask, setDraggingTask] = useState<Doc<"tasks"> | null>(null);
   const isMobile = useIsMobile();
-  
+
   // Mobile tab bar state
   const [activeTab, setActiveTab] = useState<Status>("backlog");
 
-  // Switch tab with haptic feedback
+  // Scroll position preservation per column
+  const scrollPositions = useRef<Record<Status, number>>({
+    backlog: 0,
+    in_progress: 0,
+    blocked: 0,
+    done: 0,
+  });
+
+  // Ref for the column content panel (for focus management)
+  const columnPanelRef = useRef<HTMLDivElement>(null);
+
+  // Save scroll position when it changes
+  const handleScroll = useCallback(() => {
+    if (columnPanelRef.current) {
+      scrollPositions.current[activeTab] = columnPanelRef.current.scrollTop;
+    }
+  }, [activeTab]);
+
+  // Restore scroll position when tab changes
+  useEffect(() => {
+    if (isMobile && columnPanelRef.current) {
+      columnPanelRef.current.scrollTop = scrollPositions.current[activeTab];
+    }
+  }, [activeTab, isMobile]);
+
+  // Switch tab with haptic feedback and focus management
   const handleTabChange = useCallback((status: Status) => {
     if (status !== activeTab) {
+      // Save current scroll position before switching
+      if (columnPanelRef.current) {
+        scrollPositions.current[activeTab] = columnPanelRef.current.scrollTop;
+      }
       triggerNavigationHaptic("tapNavDot");
       setActiveTab(status);
+      // Move focus to column content for accessibility
+      setTimeout(() => {
+        columnPanelRef.current?.focus();
+      }, 0);
     }
   }, [activeTab]);
 
@@ -119,49 +154,18 @@ export function Board({
     [tasks, updateTask]
   );
 
-  // Handle task movement from modal (mobile)
-  const handleMoveTask = useCallback(async (taskId: string, newStatus: Status) => {
-    const task = tasks?.find((t) => t._id === taskId);
-    if (task && task.status !== newStatus) {
-      await updateTask({
-        id: taskId as Id<"tasks">,
-        updates: { status: newStatus },
-      });
-      // If moved to the active tab's column, stay there, otherwise switch tabs
-      if (newStatus !== activeTab && isMobile) {
-        setActiveTab(newStatus);
-      }
-    }
-  }, [tasks, updateTask, activeTab, isMobile]);
-
-  // Handle task deletion
-  const handleDeleteTask = useCallback(async (taskId: string) => {
-    if (confirm("Are you sure you want to delete this task?")) {
-      await deleteTask({ id: taskId as Id<"tasks"> });
-      triggerTaskHaptic("taskDeleted");
-    }
-  }, [deleteTask]);
-
-  // Handle setting active task
-  const handleSetActiveTask = useCallback(async (taskId: string) => {
-    const task = tasks?.find((t) => t._id === taskId);
-    if (!task) return;
-    
-    if (task.isActive) {
-      await clearActiveTask();
-    } else {
-      await setActiveTask({ id: taskId as Id<"tasks"> });
-    }
-  }, [tasks, setActiveTask, clearActiveTask]);
-
-  // Loading state
+  // Loading state - single skeleton on mobile, 4 on desktop
   if (tasks === undefined) {
     return (
       <div className={styles.container}>
         <div className={styles.loading}>
-          {COLUMN_ORDER.map((status) => (
-            <ColumnSkeleton key={status} />
-          ))}
+          {isMobile ? (
+            <ColumnSkeleton />
+          ) : (
+            COLUMN_ORDER.map((status) => (
+              <ColumnSkeleton key={status} />
+            ))
+          )}
         </div>
       </div>
     );
@@ -196,10 +200,10 @@ export function Board({
                 tasks={tasksByStatus[status]}
                 onAddTask={onAddTask}
                 onEditTask={onEditTask}
-                onDeleteTask={handleDeleteTask}
-                onSetActiveTask={handleSetActiveTask}
-                onMoveTask={handleMoveTask}
                 onRefresh={onRefresh}
+                activeTaskId={activeTaskId}
+                totalTasks={totalTasksByStatus?.[status]}
+                hasActiveFilters={hasActiveFilters}
               />
             ))}
           </div>
@@ -208,74 +212,96 @@ export function Board({
         {/* Mobile Tab Bar View */}
         {isMobile && (
           <>
-            {/* Column title */}
+            {/* Column title - sticky */}
             <div className={styles.mobileColumnTitle}>
-              <span 
+              <span
                 className={styles.mobileColumnTitleDot}
                 style={{ backgroundColor: STATUS_CONFIG[activeTab].color }}
               />
               <span className={styles.mobileColumnTitleText}>
                 {STATUS_CONFIG[activeTab].label}
               </span>
-              <span className={styles.mobileColumnTitleCount}>
+              <span
+                className={styles.mobileColumnTitleCount}
+                aria-live="polite"
+                aria-atomic="true"
+              >
                 {tasksByStatus[activeTab]?.length ?? 0} {(tasksByStatus[activeTab]?.length ?? 0) === 1 ? 'task' : 'tasks'}
               </span>
             </div>
 
-            {/* Active Column */}
-            <div className={styles.mobileColumnView}>
+            {/* Active Column - tabpanel */}
+            <div
+              ref={columnPanelRef}
+              className={styles.mobileColumnView}
+              role="tabpanel"
+              id={`column-panel-${activeTab}`}
+              aria-labelledby={`tab-${activeTab}`}
+              tabIndex={-1}
+              onScroll={handleScroll}
+            >
               <Column
                 status={activeTab}
                 tasks={tasksByStatus[activeTab]}
                 onAddTask={onAddTask}
                 onEditTask={onEditTask}
-                onDeleteTask={handleDeleteTask}
-                onSetActiveTask={handleSetActiveTask}
-                onMoveTask={handleMoveTask}
                 onRefresh={onRefresh}
                 isCollapsible
+                activeTaskId={activeTaskId}
+                totalTasks={totalTasksByStatus?.[activeTab]}
+                hasActiveFilters={hasActiveFilters}
               />
             </div>
 
             {/* Bottom Tab Bar */}
-            <nav className={styles.mobileTabBar} aria-label="Column navigation">
+            <nav
+              className={styles.mobileTabBar}
+              role="tablist"
+              aria-label="Column navigation"
+            >
               {COLUMN_ORDER.map((status) => {
                 const config = STATUS_CONFIG[status];
                 const count = tasksByStatus[status]?.length ?? 0;
                 const isActive = activeTab === status;
-                
+
                 return (
                   <button
                     key={status}
+                    id={`tab-${status}`}
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-controls={`column-panel-${status}`}
                     className={clsx(
                       styles.mobileTab,
                       isActive && styles.mobileTabActive
                     )}
                     onClick={() => handleTabChange(status)}
-                    aria-label={`${config.label} (${count} tasks)`}
-                    aria-current={isActive ? "page" : undefined}
                   >
                     {/* Status dot */}
-                    <span 
+                    <span
                       className={styles.mobileTabDot}
                       style={{ backgroundColor: config.color }}
                     />
-                    
+
                     {/* Label */}
                     <span className={styles.mobileTabLabel}>
                       {config.label}
                     </span>
-                    
-                    {/* Count badge */}
+
+                    {/* Count badge - using flexbox positioning */}
                     {count > 0 && (
-                      <span className={styles.mobileTabCount}>
+                      <span
+                        className={styles.mobileTabCount}
+                        aria-live="polite"
+                        aria-atomic="true"
+                      >
                         {count}
                       </span>
                     )}
-                    
+
                     {/* Active indicator line */}
                     {isActive && (
-                      <span 
+                      <span
                         className={styles.mobileTabIndicator}
                         style={{ backgroundColor: config.color }}
                       />

@@ -2,8 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 import { useMutation } from "convex/react";
 import { toast } from "sonner";
 import { api } from "../../../convex/_generated/api";
-import type { Doc } from "../../../convex/_generated/dataModel";
-import { PRIORITY_CONFIG, type Status, type Priority } from "@/lib/constants";
+import type { Doc, Id } from "../../../convex/_generated/dataModel";
+import { PRIORITY_CONFIG, COLUMN_ORDER, STATUS_CONFIG, type Status, type Priority } from "@/lib/constants";
+import { useIsMobile } from "@/hooks";
+import { showMoveToast } from "@/components/Toast";
 import clsx from "clsx";
 import { TimeDisplay } from "./TimeDisplay";
 import styles from "./TaskModal.module.css";
@@ -13,23 +15,29 @@ interface TaskModalProps {
   onClose: () => void;
   task?: Doc<"tasks"> | null;
   defaultStatus?: Status;
+  activeTaskId?: string | null;
 }
 
 const TAG_OPTIONS = ["project", "research", "bug", "feature", "maintenance", "cruise"];
 
-export function TaskModal({ isOpen, onClose, task, defaultStatus = "backlog" }: TaskModalProps) {
+export function TaskModal({ isOpen, onClose, task, defaultStatus = "backlog", activeTaskId }: TaskModalProps) {
   const createTask = useMutation(api.tasks.createTask);
   const updateTask = useMutation(api.tasks.updateTask);
   const archiveTask = useMutation(api.tasks.archiveTask);
+  const setActiveTask = useMutation(api.tasks.setActiveTask);
+  const clearActiveTask = useMutation(api.tasks.clearActiveTask);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<Priority>("medium");
   const [selectedTags, setSelectedTags] = useState<string[]>(["project"]);
   const [dueDate, setDueDate] = useState("");
+  const [currentStatus, setCurrentStatus] = useState<Status>(defaultStatus);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isEditing = !!task;
+  const isMobile = useIsMobile();
+  const isActiveTask = task ? task._id === activeTaskId : false;
 
   // Reset form when modal opens/closes or task changes
   useEffect(() => {
@@ -39,14 +47,52 @@ export function TaskModal({ isOpen, onClose, task, defaultStatus = "backlog" }: 
       setPriority(task.priority as Priority);
       setSelectedTags(task.tags.length > 0 ? task.tags : ["project"]);
       setDueDate(task.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] ?? "" : "");
+      setCurrentStatus(task.status as Status);
     } else if (isOpen) {
       setTitle("");
       setDescription("");
       setPriority("medium");
       setSelectedTags(["project"]);
       setDueDate("");
+      setCurrentStatus(defaultStatus);
     }
-  }, [isOpen, task]);
+  }, [isOpen, task, defaultStatus]);
+
+  // Handle status change - fires immediately
+  const handleStatusChange = useCallback(async (newStatus: Status) => {
+    if (!task || newStatus === currentStatus) return;
+
+    try {
+      await updateTask({
+        id: task._id,
+        updates: { status: newStatus },
+      });
+      setCurrentStatus(newStatus);
+      // Show toast on mobile (spec: toast replaces auto-tab-switch)
+      if (isMobile) {
+        showMoveToast(newStatus);
+      }
+    } catch (error) {
+      toast.error("Failed to move task");
+      console.error("Failed to move task:", error);
+    }
+  }, [task, currentStatus, updateTask, isMobile]);
+
+  // Handle active toggle - fires immediately
+  const handleActiveToggle = useCallback(async () => {
+    if (!task) return;
+
+    try {
+      if (isActiveTask) {
+        await clearActiveTask();
+      } else {
+        await setActiveTask({ id: task._id });
+      }
+    } catch (error) {
+      toast.error("Failed to update active task");
+      console.error("Failed to update active task:", error);
+    }
+  }, [task, isActiveTask, setActiveTask, clearActiveTask]);
 
   const handleSave = useCallback(async () => {
     if (!title.trim()) {
@@ -163,6 +209,64 @@ export function TaskModal({ isOpen, onClose, task, defaultStatus = "backlog" }: 
               placeholder="Add details..."
             />
           </div>
+
+          {/* Status segmented control - edit mode only */}
+          {isEditing && (
+            <div className={styles.formGroup}>
+              <label>Status</label>
+              <div className={styles.statusOptions}>
+                {COLUMN_ORDER.map((status) => {
+                  const config = STATUS_CONFIG[status];
+                  const isSelected = currentStatus === status;
+                  return (
+                    <button
+                      key={status}
+                      type="button"
+                      className={clsx(
+                        styles.statusOption,
+                        isSelected && styles.statusSelected
+                      )}
+                      onClick={() => handleStatusChange(status)}
+                      style={{
+                        '--status-color': config.color,
+                      } as React.CSSProperties}
+                    >
+                      <span
+                        className={styles.statusDot}
+                        style={{ backgroundColor: config.color }}
+                      />
+                      {config.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Active task toggle - edit mode only */}
+          {isEditing && (
+            <div className={styles.formGroup}>
+              <label
+                className={styles.toggleLabel}
+                htmlFor="activeToggle"
+              >
+                <span className={styles.toggleText}>Active task</span>
+                <button
+                  id="activeToggle"
+                  type="button"
+                  role="switch"
+                  aria-checked={isActiveTask}
+                  className={clsx(
+                    styles.toggle,
+                    isActiveTask && styles.toggleActive
+                  )}
+                  onClick={handleActiveToggle}
+                >
+                  <span className={styles.toggleThumb} />
+                </button>
+              </label>
+            </div>
+          )}
 
           <div className={styles.formRow}>
             <div className={styles.formGroup}>

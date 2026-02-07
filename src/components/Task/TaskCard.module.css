@@ -6,7 +6,7 @@
   cursor: grab;
   transition: var(--transition);
   position: relative;
-  box-shadow: 
+  box-shadow:
     0 1px 2px rgba(45, 40, 36, 0.04),
     0 4px 12px rgba(45, 40, 36, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
@@ -19,7 +19,7 @@
 .card:hover {
   background: rgba(250, 248, 245, 0.95);
   border-color: rgba(255, 255, 255, 0.9);
-  box-shadow: 
+  box-shadow:
     0 4px 12px rgba(45, 40, 36, 0.08),
     0 8px 24px rgba(45, 40, 36, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
@@ -32,7 +32,7 @@
 
 .card.dragging {
   opacity: 0.5;
-  box-shadow: 
+  box-shadow:
     0 0 0 2px rgba(90, 154, 232, 0.2),
     0 4px 16px rgba(90, 154, 232, 0.1);
   transform: scale(0.98);
@@ -40,29 +40,10 @@
 
 .card.active {
   border-color: var(--chroma-blue);
-  box-shadow: 
+  box-shadow:
     0 0 0 2px var(--chroma-blue-muted),
     0 4px 16px rgba(90, 154, 232, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
-}
-
-/* Mobile card styles - clean, stable, no transforms */
-.card.mobile {
-  touch-action: auto;
-  user-select: none;
-  -webkit-user-select: none;
-  cursor: pointer;
-}
-
-/* On mobile, cards don't transform on hover/press */
-.card.mobile:hover {
-  transform: none;
-  background: rgba(250, 248, 245, 0.9);
-}
-
-.card.mobile:active {
-  transform: none;
-  background: rgba(250, 248, 245, 0.95);
 }
 
 /* Ultra-soft gradient priority indicator - covers almost entire card */
@@ -175,6 +156,11 @@
   min-height: 44px;
 }
 
+.menu svg {
+  width: 16px;
+  height: 16px;
+}
+
 .card:hover .menu {
   opacity: 1;
 }
@@ -183,12 +169,6 @@
   background: rgba(250, 248, 245, 0.95);
   border-color: var(--chroma-blue);
   color: var(--chroma-blue);
-}
-
-/* Menu always visible on mobile */
-.menuVisible {
-  opacity: 1;
-  background: rgba(250, 248, 245, 0.9);
 }
 
 .description {
@@ -278,7 +258,7 @@
   border: 1px solid rgba(255, 255, 255, 0.9);
   border-radius: var(--radius-lg);
   padding: var(--space-4);
-  box-shadow: 
+  box-shadow:
     0 0 0 1px rgba(90, 154, 232, 0.15),
     0 25px 50px -12px rgba(45, 40, 36, 0.25),
     0 12px 24px -8px rgba(45, 40, 36, 0.15),
@@ -290,29 +270,63 @@
   animation: dragLift 0.2s ease-out;
 }
 
-/* Mobile responsive adjustments */
+@keyframes dragLift {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.02) rotate(-1deg);
+    opacity: 0.95;
+  }
+}
+
+/* ===========================================
+   MOBILE RESPONSIVE ADJUSTMENTS
+   Use media queries ONLY (no .mobile class)
+   =========================================== */
+
 @media (max-width: 768px) {
   .card {
     padding: var(--space-3);
     min-height: 80px;
-    /* No transform effects on mobile */
+    cursor: pointer;
+    touch-action: auto;
+    user-select: none;
+    -webkit-user-select: none;
   }
-  
+
+  /* Explicitly override hover effects on mobile */
+  .card:hover {
+    transform: none;
+    background: rgba(250, 248, 245, 0.85);
+    box-shadow:
+      0 1px 2px rgba(45, 40, 36, 0.04),
+      0 4px 12px rgba(45, 40, 36, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  .card:active {
+    cursor: pointer;
+    transform: none;
+    background: rgba(250, 248, 245, 0.9);
+  }
+
   .title {
     font-size: var(--text-base);
   }
-  
+
   .description {
     font-size: var(--text-sm);
     -webkit-line-clamp: 3;
   }
-  
+
+  /* Menu always visible on mobile */
   .menu {
     opacity: 1;
-    min-width: 44px;
-    min-height: 44px;
+    background: rgba(250, 248, 245, 0.9);
   }
-  
+
   .footer {
     gap: var(--space-2);
   }
@@ -323,7 +337,6 @@
   .card {
     padding: var(--space-3);
     border-radius: var(--radius);
-    /* No transform on press */
   }
 }
 
@@ -333,9 +346,8 @@
     transform: none;
     background: rgba(250, 248, 245, 0.85);
   }
-  
+
   .card:active {
-    /* No scale transform - keep cards stable */
     background: rgba(250, 248, 245, 0.9);
   }
 }
@@ -343,18 +355,16 @@
 /* Reduce motion preference */
 @media (prefers-reduced-motion: reduce) {
   .card,
-  .menu {
+  .menu,
+  .tag {
     transition: none;
   }
-}
 
-/* Remove old mobile gesture styles */
-.swiping,
-.pressing,
-.swipeAction,
-.swipeActionLeft,
-.swipeActionRight,
-.swipeActionVisible,
-.ripple {
-  display: none;
+  .skeleton {
+    animation: none;
+  }
+
+  .dragOverlay {
+    animation: none;
+  }
 }

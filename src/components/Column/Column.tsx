@@ -15,12 +15,11 @@ interface ColumnProps {
   tasks: Doc<"tasks">[];
   onAddTask?: (status: Status) => void;
   onEditTask?: (taskId: string) => void;
-  onDeleteTask?: (taskId: string) => void;
-  onSetActiveTask?: (taskId: string) => void;
-  onMoveTask?: (taskId: string, newStatus: Status) => void;
   onRefresh?: () => Promise<void>;
-  isActive?: boolean;
   isCollapsible?: boolean;
+  activeTaskId?: string | null;
+  totalTasks?: number; // Total tasks before filtering (for empty state differentiation)
+  hasActiveFilters?: boolean;
 }
 
 // Chromolume loading spinner component
@@ -43,9 +42,9 @@ function ChromolumeSpinner() {
 function PullIndicator({ distance }: { distance: number }) {
   const progress = Math.min(distance / 60, 1);
   const isReady = distance >= 60;
-  
+
   return (
-    <div 
+    <div
       className={clsx(
         styles.pullIndicator,
         isReady && styles.pullReady
@@ -55,7 +54,7 @@ function PullIndicator({ distance }: { distance: number }) {
         transform: `translateY(${(1 - progress) * -20}px)`,
       }}
     >
-      <div 
+      <div
         className={styles.pullArrow}
         style={{
           transform: `rotate(${progress * 180}deg)`,
@@ -72,17 +71,25 @@ function PullIndicator({ distance }: { distance: number }) {
   );
 }
 
-export function Column({ 
-  status, 
-  tasks, 
-  onAddTask, 
+// Empty pull-to-refresh hook return value for mobile
+const emptyPullState = {
+  containerRef: { current: null },
+  pullState: { isPulling: false, isRefreshing: false, pullDistance: 0 },
+  handleTouchStart: undefined,
+  handleTouchMove: undefined,
+  handleTouchEnd: undefined,
+};
+
+export function Column({
+  status,
+  tasks,
+  onAddTask,
   onEditTask,
-  onDeleteTask,
-  onSetActiveTask,
-  onMoveTask,
   onRefresh,
-  isActive,
   isCollapsible = false,
+  activeTaskId,
+  totalTasks,
+  hasActiveFilters = false,
 }: ColumnProps) {
   const config = STATUS_CONFIG[status];
   const showAddButton = status !== "done";
@@ -101,91 +108,101 @@ export function Column({
   const lowCount = tasks.filter((t) => t.priority === "low").length;
 
   // Calculate progress
-  const totalTasks = tasks.length;
-  const progressPercent = totalTasks > 0 ? Math.min((totalTasks / 10) * 100, 100) : 0;
+  const displayedTasks = tasks.length;
+  const progressPercent = displayedTasks > 0 ? Math.min((displayedTasks / 10) * 100, 100) : 0;
 
   // Pull to refresh setup (desktop only - mobile uses tab bar)
-  const { 
-    containerRef, 
-    pullState, 
-    handleTouchStart, 
-    handleTouchMove, 
-    handleTouchEnd 
-  } = usePullToRefresh(async () => {
-    await onRefresh?.();
-  }, !isMobile); // Only on desktop
+  // Conditionally skip hook on mobile to avoid unnecessary event listeners
+  const pullToRefreshResult = isMobile
+    ? emptyPullState
+    : usePullToRefresh(async () => {
+        await onRefresh?.();
+      }, true);
+
+  const {
+    containerRef,
+    pullState,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+  } = pullToRefreshResult;
 
   // Combine refs for droppable and pull-to-refresh
   const setCombinedRef = (element: HTMLDivElement | null) => {
     setNodeRef(element);
-    (containerRef as React.MutableRefObject<HTMLDivElement | null>).current = element;
+    if (!isMobile) {
+      (containerRef as React.MutableRefObject<HTMLDivElement | null>).current = element;
+    }
   };
 
+  // Determine empty state type
+  const isFilteredEmpty = hasActiveFilters && tasks.length === 0 && (totalTasks ?? 0) > 0;
+  const isTrulyEmpty = tasks.length === 0 && !isFilteredEmpty;
+
   return (
-    <div 
+    <div
       className={clsx(
-        styles.column, 
-        isActive && styles.columnActive,
+        styles.column,
         isMobile && styles.columnMobile
       )}
     >
       {/* Header - hidden when collapsible (mobile tab bar shows this info) */}
       {!isCollapsible && (
-      <div className={styles.header}>
-        <div className={styles.headerTop}>
-          <span
-            className={styles.icon}
-            data-status={status}
-            style={{ background: config.color, color: config.color }}
-          />
-          <span className={styles.title}>{config.label}</span>
-          <span className={styles.count}>
-            {totalTasks} {totalTasks === 1 ? "task" : "tasks"}
-          </span>
-        </div>
-
-        {/* Progress bar */}
-        <div className={styles.progressBar}>
-          <div
-            className={styles.progressFill}
-            data-status={status}
-            style={{
-              width: `${progressPercent}%`,
-              background: config.color,
-            }}
-          />
-        </div>
-
-        {/* Priority breakdown dots */}
-        {totalTasks > 0 && (
-          <div className={styles.priorityBreakdown}>
-            {urgentCount > 0 && (
-              <div
-                className={`${styles.priorityDot} ${styles.priorityUrgent}`}
-                title={`${urgentCount} urgent`}
-              />
-            )}
-            {highCount > 0 && (
-              <div
-                className={`${styles.priorityDot} ${styles.priorityHigh}`}
-                title={`${highCount} high`}
-              />
-            )}
-            {mediumCount > 0 && (
-              <div
-                className={`${styles.priorityDot} ${styles.priorityMedium}`}
-                title={`${mediumCount} medium`}
-              />
-            )}
-            {lowCount > 0 && (
-              <div
-                className={`${styles.priorityDot} ${styles.priorityLow}`}
-                title={`${lowCount} low`}
-              />
-            )}
+        <div className={styles.header}>
+          <div className={styles.headerTop}>
+            <span
+              className={styles.icon}
+              data-status={status}
+              style={{ background: config.color, color: config.color }}
+            />
+            <span className={styles.title}>{config.label}</span>
+            <span className={styles.count}>
+              {displayedTasks} {displayedTasks === 1 ? "task" : "tasks"}
+            </span>
           </div>
-        )}
-      </div>
+
+          {/* Progress bar */}
+          <div className={styles.progressBar}>
+            <div
+              className={styles.progressFill}
+              data-status={status}
+              style={{
+                width: `${progressPercent}%`,
+                background: config.color,
+              }}
+            />
+          </div>
+
+          {/* Priority breakdown dots */}
+          {displayedTasks > 0 && (
+            <div className={styles.priorityBreakdown}>
+              {urgentCount > 0 && (
+                <div
+                  className={`${styles.priorityDot} ${styles.priorityUrgent}`}
+                  title={`${urgentCount} urgent`}
+                />
+              )}
+              {highCount > 0 && (
+                <div
+                  className={`${styles.priorityDot} ${styles.priorityHigh}`}
+                  title={`${highCount} high`}
+                />
+              )}
+              {mediumCount > 0 && (
+                <div
+                  className={`${styles.priorityDot} ${styles.priorityMedium}`}
+                  title={`${mediumCount} medium`}
+                />
+              )}
+              {lowCount > 0 && (
+                <div
+                  className={`${styles.priorityDot} ${styles.priorityLow}`}
+                  title={`${lowCount} low`}
+                />
+              )}
+            </div>
+          )}
+        </div>
       )}
 
       {/* Pull to refresh indicator - desktop only */}
@@ -203,7 +220,7 @@ export function Column({
       <div
         ref={setCombinedRef}
         className={clsx(
-          styles.taskList, 
+          styles.taskList,
           isOver && styles.dragOver,
           isMobile && styles.taskListMobile
         )}
@@ -211,27 +228,43 @@ export function Column({
         onTouchMove={!isMobile ? handleTouchMove : undefined}
         onTouchEnd={!isMobile ? handleTouchEnd : undefined}
         style={{
-          transform: pullState.isPulling 
-            ? `translateY(${pullState.pullDistance}px)` 
+          transform: pullState.isPulling
+            ? `translateY(${pullState.pullDistance}px)`
             : undefined,
           transition: pullState.isPulling ? 'none' : 'transform 0.3s ease',
         }}
       >
         <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
           {tasks.map((task) => (
-            <SortableTaskCard 
-              key={task._id} 
-              task={task} 
+            <SortableTaskCard
+              key={task._id}
+              task={task}
               onEdit={onEditTask}
-              onDelete={onDeleteTask}
-              onSetActive={onSetActiveTask}
-              onMoveTask={onMoveTask}
+              activeTaskId={activeTaskId}
             />
           ))}
         </SortableContext>
 
-        {/* Empty state */}
-        {tasks.length === 0 && (
+        {/* Empty state - differentiate "no tasks" vs "filtered out" */}
+        {isFilteredEmpty && (
+          <div className={styles.emptyState}>
+            <div className={styles.emptyStateCard}>
+              <div className={styles.emptyStateIcon} style={{ color: config.color }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+                </svg>
+              </div>
+              <p className={styles.emptyStateText}>
+                No tasks match your search
+              </p>
+              <div className={styles.emptyStateHint}>
+                Try adjusting your filters
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isTrulyEmpty && (
           <div className={styles.emptyState}>
             <div className={styles.emptyStateCard}>
               <div className={styles.emptyStateIcon} style={{ color: config.color }}>

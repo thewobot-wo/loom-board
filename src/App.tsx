@@ -1,18 +1,19 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useQuery, Authenticated, Unauthenticated, AuthLoading } from "convex/react";
 import { api } from "../convex/_generated/api";
 import type { Doc } from "../convex/_generated/dataModel";
-import { useFilters, useAutoArchive, useKeyboardShortcuts } from "@/hooks";
+import { useFilters, useAutoArchive, useKeyboardShortcuts, useIsMobile } from "@/hooks";
+import { COLUMN_ORDER, type Status } from "@/lib/constants";
 import { Header } from "@/components/Header";
 import { FilterBar } from "@/components/Filters";
 import { Board } from "@/components/Board";
 import { TaskModal } from "@/components/Task";
 import { HistoryPanel } from "@/components/History";
 import { ArchiveSection } from "@/components/Archive";
+import { Toast } from "@/components/Toast";
 import { LoginScreen } from "@/components/Auth";
 import { MigrationModal } from "@/components/Migration";
 import { hasMigrated, readLocalStorageTasks, markMigrated } from "@/lib/migration";
-import type { Status } from "@/lib/constants";
 
 // Loading spinner component for auth check
 function AuthLoadingScreen() {
@@ -51,8 +52,13 @@ function AuthLoadingScreen() {
 
 // Main board content (extracted from old App)
 function BoardContent() {
+  const isMobile = useIsMobile();
   const tasks = useQuery(api.tasks.listTasks);
-  const archivedTasks = useQuery(api.tasks.listArchivedTasks);
+  // Skip archive query on mobile to avoid fetching data that won't be displayed
+  const archivedTasks = useQuery(
+    api.tasks.listArchivedTasks,
+    isMobile ? "skip" : undefined
+  );
 
   // Migration auto-detection
   const [showMigration, setShowMigration] = useState(false);
@@ -81,6 +87,20 @@ function BoardContent() {
     hasActiveFilters,
     filteredTasks,
   } = useFilters(tasks);
+
+  // Calculate total tasks by status (before filtering) for empty state differentiation
+  const totalTasksByStatus = useMemo(() => {
+    if (!tasks) return undefined;
+    return COLUMN_ORDER.reduce((acc, status) => {
+      acc[status] = tasks.filter((t) => t.status === status).length;
+      return acc;
+    }, {} as Record<Status, number>);
+  }, [tasks]);
+
+  // Get active task ID
+  const activeTaskId = useMemo(() => {
+    return tasks?.find((t) => t.isActive)?._id ?? null;
+  }, [tasks]);
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -175,6 +195,9 @@ function BoardContent() {
         tasks={filteredTasks}
         onAddTask={handleAddTask}
         onEditTask={handleEditTask}
+        activeTaskId={activeTaskId}
+        totalTasksByStatus={totalTasksByStatus}
+        hasActiveFilters={hasActiveFilters}
       />
 
       <ArchiveSection archivedTasks={archivedTasks ?? []} />
@@ -184,9 +207,13 @@ function BoardContent() {
         onClose={handleCloseModal}
         task={editingTask}
         defaultStatus={defaultStatus}
+        activeTaskId={activeTaskId}
       />
 
       <HistoryPanel isOpen={isHistoryOpen} onClose={handleCloseHistory} />
+
+      {/* Toast for task move notifications on mobile */}
+      {isMobile && <Toast />}
     </main>
   );
 }

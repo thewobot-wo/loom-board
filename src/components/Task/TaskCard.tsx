@@ -1,7 +1,7 @@
-import { memo, useCallback } from "react";
+import { memo, useCallback, useRef, useState } from "react";
 import clsx from "clsx";
 import type { Doc } from "../../../convex/_generated/dataModel";
-import { TAG_COLORS, type Status } from "@/lib/constants";
+import { TAG_COLORS } from "@/lib/constants";
 import { formatDate, isOverdue, isDueSoon } from "@/lib/utils";
 import { useIsMobile } from "@/hooks";
 import { TimeDisplay } from "./TimeDisplay";
@@ -11,23 +11,22 @@ interface TaskCardProps {
   task: Doc<"tasks">;
   isDragging?: boolean;
   onEdit?: (taskId: string) => void;
-  onDelete?: (taskId: string) => void;
-  onSetActive?: (taskId: string) => void;
-  onMoveTask?: (taskId: string, newStatus: Status) => void;
-  onRefresh?: () => Promise<void>;
+  activeTaskId?: string | null;
 }
 
-function TaskCardComponent({ 
-  task, 
-  isDragging, 
-  onEdit, 
-  onDelete, 
-  onSetActive,
-  onMoveTask,
+function TaskCardComponent({
+  task,
+  isDragging,
+  onEdit,
+  activeTaskId,
 }: TaskCardProps) {
-  const isActive = task.isActive;
+  const isActive = task.isActive || task._id === activeTaskId;
   const isMobile = useIsMobile();
-  
+
+  // Scroll-click protection: track touch position to distinguish scrolls from taps
+  const touchStartY = useRef<number>(0);
+  const [isScrolling, setIsScrolling] = useState(false);
+
   const priorityClasses = {
     urgent: styles.priorityUrgent,
     high: styles.priorityHigh,
@@ -37,25 +36,48 @@ function TaskCardComponent({
   const priorityClass = priorityClasses[task.priority];
   const defaultColors = { bg: "rgba(59, 130, 246, 0.15)", text: "var(--accent-blue)" };
 
-  // Simple click handler - opens edit modal
+  // Touch handlers for scroll-click protection
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (touch) {
+      touchStartY.current = touch.clientY;
+      setIsScrolling(false);
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (touch) {
+      const deltaY = Math.abs(touch.clientY - touchStartY.current);
+      if (deltaY > 10) {
+        setIsScrolling(true);
+      }
+    }
+  }, []);
+
+  // Simple click handler - opens edit modal (suppressed if scrolling on mobile)
   const handleClick = useCallback(() => {
+    if (isMobile && isScrolling) {
+      return; // Suppress click if user was scrolling
+    }
     onEdit?.(task._id);
-  }, [task._id, onEdit]);
+  }, [task._id, onEdit, isMobile, isScrolling]);
 
   return (
     <div
       className={clsx(
         styles.card,
         isDragging && styles.dragging,
-        isActive && styles.active,
-        isMobile && styles.mobile
+        isActive && styles.active
       )}
       data-task-id={task._id}
       onClick={handleClick}
+      onTouchStart={isMobile ? handleTouchStart : undefined}
+      onTouchMove={isMobile ? handleTouchMove : undefined}
     >
       {/* Soft gradient priority indicator */}
       <div className={clsx(styles.priorityIndicator, priorityClass)} />
-      
+
       <div className={styles.content}>
         <div className={styles.header}>
           <div className={styles.titleRow}>
@@ -63,7 +85,7 @@ function TaskCardComponent({
             <div className={styles.title}>{task.title}</div>
           </div>
           <button
-            className={clsx(styles.menu, isMobile && styles.menuVisible)}
+            className={styles.menu}
             onClick={(e) => {
               e.stopPropagation();
               onEdit?.(task._id);
@@ -77,11 +99,11 @@ function TaskCardComponent({
             </svg>
           </button>
         </div>
-        
+
         {task.description && (
           <div className={styles.description}>{task.description}</div>
         )}
-        
+
         <div className={styles.footer}>
           <div className={styles.tags}>
             {task.tags.map((tag) => {
@@ -106,7 +128,7 @@ function TaskCardComponent({
             status={task.status}
             compact
           />
-          
+
           {task.dueDate && (
             <span
               className={clsx(
