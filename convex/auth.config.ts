@@ -1,7 +1,7 @@
 export default {
   providers: [
     {
-      domain: process.env.CONVEX_SITE_URL,
+      domain: "https://adamant-parakeet-675.convex.site",
       applicationID: "convex",
     },
   ],
