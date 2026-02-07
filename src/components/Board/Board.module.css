@@ -111,14 +111,11 @@
   }
 }
 
-/* Mobile Column View - single column takes full height */
+/* Mobile Column View - scrollable, fills available space */
 .mobileColumnView {
-  height: calc(100vh - 200px); /* Account for header, banner, tab bar */
-  min-height: 400px;
-}
-
-.mobileColumnView > * {
-  height: 100%;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ===========================================
