@@ -153,3 +153,10 @@ body::before {
 ::selection {
   background: var(--chroma-blue-muted);
 }
+
+/* Prevent iOS auto-zoom on input focus */
+@media (max-width: 768px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
