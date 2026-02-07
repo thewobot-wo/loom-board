@@ -70,3 +70,10 @@
   color: var(--accent-blue);
   margin-top: 4px;
 }
+
+/* Hide archive on mobile - not useful in tab bar layout */
+@media (max-width: 768px) {
+  .toggle, .section {
+    display: none;
+  }
+}

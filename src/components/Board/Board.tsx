@@ -208,6 +208,20 @@ export function Board({
         {/* Mobile Tab Bar View */}
         {isMobile && (
           <>
+            {/* Column title */}
+            <div className={styles.mobileColumnTitle}>
+              <span 
+                className={styles.mobileColumnTitleDot}
+                style={{ backgroundColor: STATUS_CONFIG[activeTab].color }}
+              />
+              <span className={styles.mobileColumnTitleText}>
+                {STATUS_CONFIG[activeTab].label}
+              </span>
+              <span className={styles.mobileColumnTitleCount}>
+                {tasksByStatus[activeTab]?.length ?? 0} {(tasksByStatus[activeTab]?.length ?? 0) === 1 ? 'task' : 'tasks'}
+              </span>
+            </div>
+
             {/* Active Column */}
             <div className={styles.mobileColumnView}>
               <Column
@@ -219,6 +233,7 @@ export function Board({
                 onSetActiveTask={handleSetActiveTask}
                 onMoveTask={handleMoveTask}
                 onRefresh={onRefresh}
+                isCollapsible
               />
             </div>
 

@@ -20,6 +20,7 @@ interface ColumnProps {
   onMoveTask?: (taskId: string, newStatus: Status) => void;
   onRefresh?: () => Promise<void>;
   isActive?: boolean;
+  isCollapsible?: boolean;
 }
 
 // Chromolume loading spinner component
@@ -81,6 +82,7 @@ export function Column({
   onMoveTask,
   onRefresh,
   isActive,
+  isCollapsible = false,
 }: ColumnProps) {
   const config = STATUS_CONFIG[status];
   const showAddButton = status !== "done";
@@ -127,8 +129,9 @@ export function Column({
         isMobile && styles.columnMobile
       )}
     >
-      {/* Header - hidden on mobile (tab bar shows this info) */}
-      <div className={clsx(styles.header, isMobile && styles.headerMobile)}>
+      {/* Header - hidden when collapsible (mobile tab bar shows this info) */}
+      {!isCollapsible && (
+      <div className={styles.header}>
         <div className={styles.headerTop}>
           <span
             className={styles.icon}
@@ -183,6 +186,7 @@ export function Column({
           </div>
         )}
       </div>
+      )}
 
       {/* Pull to refresh indicator - desktop only */}
       {!isMobile && pullState.isPulling && !pullState.isRefreshing && (

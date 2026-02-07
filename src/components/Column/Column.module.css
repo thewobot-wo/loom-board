@@ -431,7 +431,7 @@
   }
 }
 
-/* Mobile tab bar layout - hide redundant header */
+/* Mobile tab bar layout */
 .columnMobile {
   max-height: none;
 }
@@ -442,4 +442,20 @@
 
 .taskListMobile {
   padding: 0;
+  gap: var(--space-3);
+}
+
+/* Collapsible mode (mobile tab view) - clean up spacing */
+.columnCollapsible .addButton {
+  margin-top: var(--space-3);
+  padding: var(--space-4);
+  background: rgba(138, 125, 112, 0.06);
+  border: 1px dashed rgba(138, 125, 112, 0.2);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  min-height: 52px;
+}
+
+.columnCollapsible .addButton:active {
+  background: rgba(138, 125, 112, 0.1);
 }
