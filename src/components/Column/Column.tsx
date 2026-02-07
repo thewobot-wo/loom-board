@@ -71,15 +71,6 @@ function PullIndicator({ distance }: { distance: number }) {
   );
 }
 
-// Empty pull-to-refresh hook return value for mobile
-const emptyPullState = {
-  containerRef: { current: null },
-  pullState: { isPulling: false, isRefreshing: false, pullDistance: 0 },
-  handleTouchStart: undefined,
-  handleTouchMove: undefined,
-  handleTouchEnd: undefined,
-};
-
 export function Column({
   status,
   tasks,
@@ -112,20 +103,16 @@ export function Column({
   const progressPercent = displayedTasks > 0 ? Math.min((displayedTasks / 10) * 100, 100) : 0;
 
   // Pull to refresh setup (desktop only - mobile uses tab bar)
-  // Conditionally skip hook on mobile to avoid unnecessary event listeners
-  const pullToRefreshResult = isMobile
-    ? emptyPullState
-    : usePullToRefresh(async () => {
-        await onRefresh?.();
-      }, true);
-
+  // Always call the hook (Rules of Hooks) but disable on mobile via the enabled flag
   const {
     containerRef,
     pullState,
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
-  } = pullToRefreshResult;
+  } = usePullToRefresh(async () => {
+    await onRefresh?.();
+  }, !isMobile);
 
   // Combine refs for droppable and pull-to-refresh
   const setCombinedRef = (element: HTMLDivElement | null) => {

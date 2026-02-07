@@ -7,12 +7,7 @@ export { useTimeTracking } from "./useTimeTracking";
 export { useKeyboardShortcuts } from "./useKeyboardShortcuts";
 export {
   useIsMobile,
-  useMobileNavigation,
-  useCardSwipe,
-  useLongPress,
   usePullToRefresh,
-  useRipple,
-  getAdjacentStatus,
 } from "./useMobileGestures";
 
 // Comprehensive haptic feedback system
