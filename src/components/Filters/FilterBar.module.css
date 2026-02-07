@@ -95,7 +95,7 @@
 
 @media (max-width: 768px) {
   .filters {
-    padding: var(--space-3);
+    padding: var(--space-2) var(--space-4);
   }
   
   .searchInput {

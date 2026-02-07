@@ -238,7 +238,7 @@
 
 @media (max-width: 768px) {
   .header {
-    padding: var(--space-2) var(--space-3);
+    padding: var(--space-2) var(--space-4);
     border-left: none;
   }
   

@@ -95,7 +95,7 @@
 
 @media (max-width: 768px) {
   .container {
-    padding: var(--space-3);
+    padding: 0 var(--space-4);
     padding-bottom: 100px; /* Space for tab bar + safe area */
     overflow-x: hidden;
     width: 100%;
