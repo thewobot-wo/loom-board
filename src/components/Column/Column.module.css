@@ -388,11 +388,58 @@
   50% { opacity: 0.5; }
 }
 
+/* Collapsible Column Styles (for mobile) */
+.columnCollapsible {
+  max-height: none;
+  min-height: auto;
+  background: transparent;
+}
+
+.columnCollapsible .header {
+  display: none;
+}
+
+.columnCollapsible .taskList {
+  max-height: none;
+  overflow: visible;
+  padding: 0;
+  gap: var(--space-2);
+}
+
+.columnCollapsible .taskListCollapsible {
+  /* When collapsible, no scroll needed */
+  overflow: visible;
+}
+
+.columnCollapsible .addButton {
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  min-height: 40px;
+  font-size: var(--text-sm);
+}
+
+.columnCollapsible .addButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+.columnCollapsible .emptyState {
+  padding: var(--space-3) 0;
+}
+
+.columnCollapsible .emptyStateCard {
+  padding: var(--space-4) var(--space-2);
+}
+
 /* Mobile Responsive Styles */
 @media (max-width: 768px) {
   .column {
     max-height: calc(100vh - 140px);
     min-height: auto;
+  }
+
+  .columnCollapsible {
+    max-height: none;
   }
   
   .header {

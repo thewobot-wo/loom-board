@@ -20,6 +20,7 @@ interface ColumnProps {
   onMoveTask?: (taskId: string, newStatus: Status) => void;
   onRefresh?: () => Promise<void>;
   isActive?: boolean;
+  isCollapsible?: boolean; // New prop for mobile layout
 }
 
 // Chromolume loading spinner component
@@ -81,6 +82,7 @@ export function Column({
   onMoveTask,
   onRefresh,
   isActive,
+  isCollapsible = false,
 }: ColumnProps) {
   const config = STATUS_CONFIG[status];
   const showAddButton = status !== "done";
@@ -102,7 +104,7 @@ export function Column({
   const totalTasks = tasks.length;
   const progressPercent = totalTasks > 0 ? Math.min((totalTasks / 10) * 100, 100) : 0;
 
-  // Pull to refresh setup
+  // Pull to refresh setup (only for mobile, not when collapsible)
   const { 
     containerRef, 
     pullState, 
@@ -111,7 +113,7 @@ export function Column({
     handleTouchEnd 
   } = usePullToRefresh(async () => {
     await onRefresh?.();
-  }, isMobile);
+  }, isMobile && !isCollapsible);
 
   // Combine refs for droppable and pull-to-refresh
   const setCombinedRef = (element: HTMLDivElement | null) => {
@@ -120,65 +122,74 @@ export function Column({
   };
 
   return (
-    <div className={clsx(styles.column, isActive && styles.columnActive)}>
-      <div className={styles.header}>
-        <div className={styles.headerTop}>
-          <span
-            className={styles.icon}
-            data-status={status}
-            style={{ background: config.color, color: config.color }}
-          />
-          <span className={styles.title}>{config.label}</span>
-          <span className={styles.count}>
-            {totalTasks} {totalTasks === 1 ? "task" : "tasks"}
-          </span>
-        </div>
-
-        {/* Progress bar - shows column "fullness" */}
-        <div className={styles.progressBar}>
-          <div
-            className={styles.progressFill}
-            data-status={status}
-            style={{
-              width: `${progressPercent}%`,
-              background: config.color,
-            }}
-          />
-        </div>
-
-        {/* Priority breakdown dots */}
-        {totalTasks > 0 && (
-          <div className={styles.priorityBreakdown}>
-            {urgentCount > 0 && (
-              <div
-                className={`${styles.priorityDot} ${styles.priorityUrgent}`}
-                title={`${urgentCount} urgent`}
-              />
-            )}
-            {highCount > 0 && (
-              <div
-                className={`${styles.priorityDot} ${styles.priorityHigh}`}
-                title={`${highCount} high`}
-              />
-            )}
-            {mediumCount > 0 && (
-              <div
-                className={`${styles.priorityDot} ${styles.priorityMedium}`}
-                title={`${mediumCount} medium`}
-              />
-            )}
-            {lowCount > 0 && (
-              <div
-                className={`${styles.priorityDot} ${styles.priorityLow}`}
-                title={`${lowCount} low`}
-              />
-            )}
+    <div 
+      className={clsx(
+        styles.column, 
+        isActive && styles.columnActive,
+        isCollapsible && styles.columnCollapsible
+      )}
+    >
+      {/* Desktop header - hidden when collapsible (mobile) */}
+      {!isCollapsible && (
+        <div className={styles.header}>
+          <div className={styles.headerTop}>
+            <span
+              className={styles.icon}
+              data-status={status}
+              style={{ background: config.color, color: config.color }}
+            />
+            <span className={styles.title}>{config.label}</span>
+            <span className={styles.count}>
+              {totalTasks} {totalTasks === 1 ? "task" : "tasks"}
+            </span>
           </div>
-        )}
-      </div>
 
-      {/* Pull to refresh indicator */}
-      {isMobile && pullState.isPulling && !pullState.isRefreshing && (
+          {/* Progress bar - shows column "fullness" */}
+          <div className={styles.progressBar}>
+            <div
+              className={styles.progressFill}
+              data-status={status}
+              style={{
+                width: `${progressPercent}%`,
+                background: config.color,
+              }}
+            />
+          </div>
+
+          {/* Priority breakdown dots */}
+          {totalTasks > 0 && (
+            <div className={styles.priorityBreakdown}>
+              {urgentCount > 0 && (
+                <div
+                  className={`${styles.priorityDot} ${styles.priorityUrgent}`}
+                  title={`${urgentCount} urgent`}
+                />
+              )}
+              {highCount > 0 && (
+                <div
+                  className={`${styles.priorityDot} ${styles.priorityHigh}`}
+                  title={`${highCount} high`}
+                />
+              )}
+              {mediumCount > 0 && (
+                <div
+                  className={`${styles.priorityDot} ${styles.priorityMedium}`}
+                  title={`${mediumCount} medium`}
+                />
+              )}
+              {lowCount > 0 && (
+                <div
+                  className={`${styles.priorityDot} ${styles.priorityLow}`}
+                  title={`${lowCount} low`}
+                />
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Pull to refresh indicator - only for mobile non-collapsible */}
+      {isMobile && !isCollapsible && pullState.isPulling && !pullState.isRefreshing && (
         <PullIndicator distance={pullState.pullDistance} />
       )}
 
@@ -191,10 +202,14 @@ export function Column({
 
       <div
         ref={setCombinedRef}
-        className={clsx(styles.taskList, isOver && styles.dragOver)}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        className={clsx(
+          styles.taskList, 
+          isOver && styles.dragOver,
+          isCollapsible && styles.taskListCollapsible
+        )}
+        onTouchStart={!isCollapsible ? handleTouchStart : undefined}
+        onTouchMove={!isCollapsible ? handleTouchMove : undefined}
+        onTouchEnd={!isCollapsible ? handleTouchEnd : undefined}
         style={{
           transform: pullState.isPulling 
             ? `translateY(${pullState.pullDistance}px)` 

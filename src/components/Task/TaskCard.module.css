@@ -46,94 +46,23 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
-/* Mobile card styles */
+/* Mobile card styles - clean, stable, no transforms */
 .card.mobile {
-  touch-action: pan-y;
+  touch-action: auto;
   user-select: none;
   -webkit-user-select: none;
+  cursor: pointer;
 }
 
-/* Pressing state for long press visual feedback */
-.card.pressing {
-  transform: scale(0.97);
-  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+/* On mobile, cards don't transform on hover/press */
+.card.mobile:hover {
+  transform: none;
   background: rgba(250, 248, 245, 0.9);
-  box-shadow: 
-    0 2px 8px rgba(45, 40, 36, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
-.card.swiping {
-  z-index: 10;
-  transition: none;
-}
-
-/* Swipe action overlays */
-.swipeAction {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  padding: var(--space-4);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.swipeActionLeft {
-  left: 0;
-  justify-content: flex-start;
-  background: linear-gradient(
-    90deg,
-    rgba(90, 154, 232, 0.9) 0%,
-    rgba(90, 154, 232, 0.4) 60%,
-    transparent 100%
-  );
-  color: white;
-  padding-left: var(--space-4);
-}
-
-.swipeActionRight {
-  right: 0;
-  justify-content: flex-end;
-  background: linear-gradient(
-    270deg,
-    rgba(74, 163, 142, 0.9) 0%,
-    rgba(74, 163, 142, 0.4) 60%,
-    transparent 100%
-  );
-  color: white;
-  padding-right: var(--space-4);
-}
-
-.swipeActionVisible {
-  opacity: 1;
-}
-
-/* Ripple effect */
-.ripple {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(90, 154, 232, 0.3);
-  transform: scale(0);
-  animation: ripple 0.6s ease-out;
-  pointer-events: none;
-  width: 20px;
-  height: 20px;
-  margin-left: -10px;
-  margin-top: -10px;
-}
-
-@keyframes ripple {
-  to {
-    transform: scale(4);
-    opacity: 0;
-  }
+.card.mobile:active {
+  transform: none;
+  background: rgba(250, 248, 245, 0.95);
 }
 
 /* Ultra-soft gradient priority indicator - covers almost entire card */
@@ -366,6 +295,7 @@
   .card {
     padding: var(--space-3);
     min-height: 80px;
+    /* No transform effects on mobile */
   }
   
   .title {
@@ -393,10 +323,7 @@
   .card {
     padding: var(--space-3);
     border-radius: var(--radius);
-  }
-  
-  .card.pressing {
-    transform: scale(0.96);
+    /* No transform on press */
   }
 }
 
@@ -408,7 +335,7 @@
   }
   
   .card:active {
-    transform: scale(0.98);
+    /* No scale transform - keep cards stable */
     background: rgba(250, 248, 245, 0.9);
   }
 }
@@ -416,14 +343,18 @@
 /* Reduce motion preference */
 @media (prefers-reduced-motion: reduce) {
   .card,
-  .menu,
-  .ripple {
+  .menu {
     transition: none;
-    animation: none;
   }
-  
-  .card.pressing {
-    transform: none;
-    background: rgba(250, 248, 245, 0.9);
-  }
+}
+
+/* Remove old mobile gesture styles */
+.swiping,
+.pressing,
+.swipeAction,
+.swipeActionLeft,
+.swipeActionRight,
+.swipeActionVisible,
+.ripple {
+  display: none;
 }
