@@ -4,6 +4,16 @@ A polished, self-hosted Kanban board for tracking tasks with AI assistants.
 
 ![Loom Board](screenshot.png)
 
+## Dev (Vite + Convex)
+
+This repo includes a Vite + React app in `src/` backed by Convex (including Google auth via `@convex-dev/auth`).
+
+1. Install deps: `npm install`
+2. Create `.env.local` from `.env.example` and set `VITE_CONVEX_URL`
+3. Run: `npm run dev`
+
+Note: backend secrets are set on the Convex deployment with `npx convex env set ...` (do not commit `.env.local`).
+
 ## Features
 
 ### Core
