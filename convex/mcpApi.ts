@@ -201,11 +201,25 @@ function isValidPriority(p: string): p is Priority {
 export const listTasksInternal = internalQuery({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
-    return await ctx.db
+    // Get tasks for this user AND tasks with null userId (migration)
+    const userTasks = await ctx.db
       .query("tasks")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .filter((q) => q.eq(q.field("archived"), false))
       .collect();
+    
+    // Also get tasks with null userId (for migration)
+    const nullUserTasks = await ctx.db
+      .query("tasks")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("archived"), false),
+          q.eq(q.field("userId"), null as any)
+        )
+      )
+      .collect();
+    
+    return [...userTasks, ...nullUserTasks];
   },
 });
 

@@ -124,7 +124,7 @@ export const getTask = query({
 
     const task = await ctx.db.get(args.id);
     if (!task) throw new Error("Task not found");
-    if (task.userId !== userId) throw new Error("Not authorized");
+    if (task.userId !== null && task.userId !== userId) throw new Error("Not authorized");
     return task;
   },
 });
@@ -136,11 +136,25 @@ export const listTasks = query({
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
 
-    return await ctx.db
+    // Get user's tasks
+    const userTasks = await ctx.db
       .query("tasks")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .filter((q) => q.eq(q.field("archived"), false))
       .collect();
+
+    // Also get tasks with null userId (migration from MCP API)
+    const nullUserTasks = await ctx.db
+      .query("tasks")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("archived"), false),
+          q.eq(q.field("userId"), null as any)
+        )
+      )
+      .collect();
+
+    return [...userTasks, ...nullUserTasks];
   },
 });
 
@@ -151,8 +165,7 @@ export const listTasksByStatus = query({
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
 
-    // Query by user first (indexed), then filter by status and archived
-    return await ctx.db
+    const userTasks = await ctx.db
       .query("tasks")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .filter((q) =>
@@ -162,6 +175,20 @@ export const listTasksByStatus = query({
         )
       )
       .collect();
+
+    // Also get null userId tasks (migration)
+    const nullUserTasks = await ctx.db
+      .query("tasks")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("archived"), false),
+          q.eq(q.field("status"), args.status),
+          q.eq(q.field("userId"), null as any)
+        )
+      )
+      .collect();
+
+    return [...userTasks, ...nullUserTasks];
   },
 });
 
@@ -177,6 +204,7 @@ export const updateTask = mutation({
       tags: v.optional(v.array(v.string())),
       dueDate: v.optional(v.number()),
       order: v.optional(v.number()),
+      userId: v.optional(v.string()), // Allow migration/fixing ownership
     }),
   },
   handler: async (ctx, args) => {
@@ -185,7 +213,8 @@ export const updateTask = mutation({
 
     const existing = await ctx.db.get(args.id);
     if (!existing) throw new Error("Task not found");
-    if (existing.userId !== userId) throw new Error("Not authorized");
+    // Allow updating tasks with null userId (migration) or owned by current user
+    if (existing.userId !== null && existing.userId !== userId) throw new Error("Not authorized");
     if (existing.archived) throw new Error("Cannot update archived task");
 
     // Validate title if provided
@@ -241,7 +270,7 @@ export const archiveTask = mutation({
 
     const task = await ctx.db.get(args.id);
     if (!task) throw new Error("Task not found");
-    if (task.userId !== userId) throw new Error("Not authorized");
+    if (task.userId !== null && task.userId !== userId) throw new Error("Not authorized");
 
     await ctx.db.patch(args.id, {
       archived: true,
@@ -270,7 +299,7 @@ export const restoreTask = mutation({
 
     const task = await ctx.db.get(args.id);
     if (!task) throw new Error("Task not found");
-    if (task.userId !== userId) throw new Error("Not authorized");
+    if (task.userId !== null && task.userId !== userId) throw new Error("Not authorized");
     if (!task.archived) throw new Error("Task is not archived");
 
     await ctx.db.patch(args.id, {
@@ -326,7 +355,17 @@ export const getActiveTask = query({
       ))
       .collect();
 
-    return activeTasks[0] ?? null;
+    // Also check null userId tasks (migration)
+    const nullActiveTask = await ctx.db
+      .query("tasks")
+      .filter((q) => q.and(
+        q.eq(q.field("isActive"), true),
+        q.eq(q.field("archived"), false),
+        q.eq(q.field("userId"), null as any)
+      ))
+      .collect();
+
+    return activeTasks[0] ?? nullActiveTask[0] ?? null;
   },
 });
 
@@ -339,7 +378,7 @@ export const setActiveTask = mutation({
 
     const task = await ctx.db.get(args.id);
     if (!task) throw new Error("Task not found");
-    if (task.userId !== userId) throw new Error("Not authorized");
+    if (task.userId !== null && task.userId !== userId) throw new Error("Not authorized");
     if (task.archived) throw new Error("Cannot activate archived task");
 
     // Find and deactivate any currently active tasks
