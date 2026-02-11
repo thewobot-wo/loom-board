@@ -232,6 +232,7 @@ export function Board({
 
             {/* Active Column - tabpanel */}
             <div
+              key={activeTab}
               ref={columnPanelRef}
               className={styles.mobileColumnView}
               role="tabpanel"

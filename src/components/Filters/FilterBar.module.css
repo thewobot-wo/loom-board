@@ -41,7 +41,8 @@
 
 .searchInput:focus {
   outline: none;
-  border-color: var(--border-strong);
+  border-color: var(--seurat-blue);
+  box-shadow: 0 0 0 3px var(--seurat-blue-muted);
   width: 240px;
 }
 
@@ -71,9 +72,9 @@
 }
 
 .chip.active {
-  background: var(--bg-secondary);
-  border-color: var(--border-strong);
-  color: var(--text-primary);
+  background: var(--seurat-blue-muted);
+  border-color: var(--seurat-blue);
+  color: var(--seurat-blue);
 }
 
 .clearButton {
@@ -121,7 +122,7 @@
 }
 
 .searchIconButton:focus-visible {
-  outline: 2px solid var(--chroma-blue);
+  outline: 2px solid var(--seurat-blue);
   outline-offset: 2px;
 }
 
@@ -132,7 +133,7 @@
   right: 6px;
   width: 8px;
   height: 8px;
-  background: var(--chroma-blue);
+  background: var(--seurat-blue);
   border-radius: 50%;
   border: 2px solid var(--bg-canvas);
 }

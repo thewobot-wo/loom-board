@@ -1,0 +1,168 @@
+.banner {
+  position: sticky;
+  top: 0;
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  background: rgba(248, 250, 252, 0.85);
+  backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  border-left: 4px solid var(--seurat-blue);
+  box-shadow: var(--shadow-glow);
+  animation: slideIn 0.3s ease-out;
+  max-width: 100%;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.focusBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  background: var(--seurat-blue-muted);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--seurat-blue);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(91, 143, 185, 0.4);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 0 6px rgba(91, 143, 185, 0);
+  }
+}
+
+.focusLabel {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--seurat-blue);
+}
+
+.title {
+  flex: 1;
+  font-size: var(--text-md);
+  font-weight: 550;
+  color: var(--text-primary);
+  line-height: 1.4;
+  min-width: 0;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.clearButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.clearButton:hover {
+  color: var(--text-secondary);
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
+}
+
+.clearButton svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Mobile: condensed layout */
+@media (max-width: 768px) {
+  .banner {
+    padding: var(--space-2) var(--space-4);
+    gap: var(--space-2);
+  }
+
+  .focusBadge {
+    padding: 0;
+    background: transparent;
+  }
+
+  .focusLabel {
+    display: none;
+  }
+
+  .title {
+    font-size: var(--text-base);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .meta {
+    gap: var(--space-2);
+  }
+
+  .statusPill {
+    display: none;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .banner {
+    animation: none;
+  }
+
+  .pulse {
+    animation: none;
+  }
+}

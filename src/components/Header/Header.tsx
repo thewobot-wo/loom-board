@@ -12,7 +12,6 @@ interface HeaderProps {
 
 export function Header({ taskCount, isLoading, onShowHistory }: HeaderProps) {
   const user = useQuery(api.users.getCurrentUser);
-  const activeTask = useQuery(api.tasks.getActiveTask);
   const { signOut } = useAuthActions();
   const [imgFailed, setImgFailed] = useState(false);
 
@@ -34,28 +33,21 @@ export function Header({ taskCount, isLoading, onShowHistory }: HeaderProps) {
 
   return (
     <>
-      <header className={styles.header} data-active-task={!!activeTask}>
+      <header className={styles.header}>
         <div className={styles.content}>
           <div className={styles.left}>
             <div className={styles.brand}>
-              <img 
-                src="/logo.jpg" 
-                alt="Chromolume" 
+              <img
+                src="/logo.jpg"
+                alt="Loom Board"
                 className={styles.logo}
                 onError={() => setImgFailed(true)}
               />
               <div className={styles.titleGroup}>
                 <h1 className={styles.title}>Loom Board</h1>
-                <span className={styles.subtitle}>Chromolume #7</span>
+                <span className={styles.subtitle}>Afternoon Light</span>
               </div>
             </div>
-            {activeTask && (
-              <div className={styles.activeTaskIndicator}>
-                <div className={styles.activeTaskPulse} />
-                <span className={styles.activeTaskLabel}>Currently working on</span>
-                <span className={styles.activeTaskTitle}>{activeTask.title}</span>
-              </div>
-            )}
           </div>
           <div className={styles.right}>
             <button className={styles.btn} onClick={onShowHistory}>

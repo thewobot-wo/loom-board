@@ -1,10 +1,11 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { useQuery, Authenticated, Unauthenticated, AuthLoading } from "convex/react";
+import { useQuery, useMutation, Authenticated, Unauthenticated, AuthLoading } from "convex/react";
 import { api } from "../convex/_generated/api";
 import type { Doc } from "../convex/_generated/dataModel";
 import { useFilters, useAutoArchive, useKeyboardShortcuts, useIsMobile } from "@/hooks";
 import { COLUMN_ORDER, type Status } from "@/lib/constants";
 import { Header } from "@/components/Header";
+import { ActiveTaskBanner } from "@/components/ActiveTaskBanner";
 import { FilterBar } from "@/components/Filters";
 import { Board } from "@/components/Board";
 import { TaskModal } from "@/components/Task";
@@ -54,6 +55,8 @@ function AuthLoadingScreen() {
 function BoardContent() {
   const isMobile = useIsMobile();
   const tasks = useQuery(api.tasks.listTasks);
+  const activeTask = useQuery(api.tasks.getActiveTask);
+  const clearActiveTaskMutation = useMutation(api.tasks.clearActiveTask);
   // Skip archive query on mobile to avoid fetching data that won't be displayed
   const archivedTasks = useQuery(
     api.tasks.listArchivedTasks,
@@ -141,6 +144,10 @@ function BoardContent() {
     setIsHistoryOpen(false);
   }, []);
 
+  const handleClearActiveTask = useCallback(() => {
+    clearActiveTaskMutation();
+  }, [clearActiveTaskMutation]);
+
   // Keyboard shortcuts
   useKeyboardShortcuts({
     onEscape: () => {
@@ -181,6 +188,10 @@ function BoardContent() {
         isLoading={tasks === undefined}
         onShowHistory={handleShowHistory}
       />
+
+      {activeTask && (
+        <ActiveTaskBanner task={activeTask} onClear={handleClearActiveTask} />
+      )}
 
       <FilterBar
         searchQuery={searchQuery}

@@ -3,6 +3,9 @@
   flex-direction: column;
   max-height: calc(100vh - 180px);
   min-height: 400px;
+  background: rgba(248, 250, 252, 0.25);
+  border-radius: var(--radius-md);
+  padding: var(--space-2);
 }
 
 .columnActive {
@@ -10,10 +13,10 @@
 }
 
 @keyframes columnPulse {
-  0%, 100% { 
+  0%, 100% {
     transform: scale(1);
   }
-  50% { 
+  50% {
     transform: scale(1.02);
   }
 }
@@ -35,7 +38,7 @@
 .icon {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: var(--radius-sm);
   position: relative;
 }
 
@@ -43,15 +46,15 @@
   content: '';
   position: absolute;
   inset: -3px;
-  border-radius: 50%;
+  border-radius: var(--radius-sm);
   border: 1px solid currentColor;
   opacity: 0.3;
 }
 
-.icon[data-status="backlog"] { background: var(--text-tertiary); color: var(--text-tertiary); }
-.icon[data-status="in_progress"] { background: var(--chroma-blue); color: var(--chroma-blue); }
-.icon[data-status="blocked"] { background: var(--chroma-red); color: var(--chroma-red); }
-.icon[data-status="done"] { background: var(--chroma-green); color: var(--chroma-green); }
+.icon[data-status="backlog"] { background: var(--status-backlog); color: var(--status-backlog); }
+.icon[data-status="in_progress"] { background: var(--status-progress); color: var(--status-progress); }
+.icon[data-status="blocked"] { background: var(--status-blocked); color: var(--status-blocked); }
+.icon[data-status="done"] { background: var(--status-done); color: var(--status-done); }
 
 .title {
   font-size: var(--text-xs);
@@ -66,10 +69,13 @@
   font-weight: 600;
   color: var(--text-muted);
   margin-left: auto;
+  padding: 1px 8px;
+  background: rgba(248, 250, 252, 0.6);
+  border-radius: var(--radius-full);
 }
 
 .progressBar {
-  height: 2px;
+  height: 3px;
   background: var(--border);
   border-radius: var(--radius-full);
   overflow: hidden;
@@ -82,10 +88,10 @@
   transition: width 0.3s ease;
 }
 
-.progressFill[data-status="backlog"] { background: var(--text-tertiary); }
-.progressFill[data-status="in_progress"] { background: var(--chroma-blue); }
-.progressFill[data-status="blocked"] { background: var(--chroma-red); }
-.progressFill[data-status="done"] { background: var(--chroma-green); }
+.progressFill[data-status="backlog"] { background: var(--status-backlog); }
+.progressFill[data-status="in_progress"] { background: var(--status-progress); }
+.progressFill[data-status="blocked"] { background: var(--status-blocked); }
+.progressFill[data-status="done"] { background: var(--status-done); }
 
 .priorityBreakdown {
   display: flex;
@@ -99,10 +105,10 @@
   border-radius: 50%;
 }
 
-.priorityUrgent { background: var(--chroma-red); }
-.priorityHigh { background: var(--chroma-orange); }
-.priorityMedium { background: var(--chroma-blue); }
-.priorityLow { background: var(--text-tertiary); }
+.priorityUrgent { background: var(--priority-urgent); }
+.priorityHigh { background: var(--priority-high); }
+.priorityMedium { background: var(--priority-normal); }
+.priorityLow { background: var(--priority-low); }
 
 .taskList {
   flex: 1;
@@ -127,7 +133,7 @@
 }
 
 .dragOver {
-  background: var(--chroma-green-muted);
+  background: var(--seurat-sage-muted);
   border-radius: var(--radius);
 }
 
@@ -144,7 +150,7 @@
 .pullArrow {
   width: 24px;
   height: 24px;
-  color: var(--chroma-blue);
+  color: var(--seurat-blue);
   transition: transform 0.2s ease;
 }
 
@@ -160,11 +166,11 @@
 }
 
 .pullReady .pullArrow {
-  color: var(--chroma-green);
+  color: var(--seurat-sage);
 }
 
 .pullReady .pullText {
-  color: var(--chroma-green);
+  color: var(--seurat-sage);
 }
 
 /* Chromolume Spinner */
@@ -203,25 +209,25 @@
 }
 
 .spinnerRing[data-color="blue"] {
-  border-top-color: var(--chroma-blue);
+  border-top-color: var(--seurat-blue);
   animation-duration: 1s;
 }
 
 .spinnerRing[data-color="green"] {
-  border-right-color: var(--chroma-green);
+  border-right-color: var(--seurat-sage);
   animation-duration: 1.2s;
   animation-direction: reverse;
   inset: 4px;
 }
 
 .spinnerRing[data-color="purple"] {
-  border-bottom-color: var(--chroma-purple);
+  border-bottom-color: var(--seurat-violet);
   animation-duration: 0.8s;
   inset: 8px;
 }
 
 .spinnerRing[data-color="orange"] {
-  border-left-color: var(--chroma-orange);
+  border-left-color: var(--seurat-terra);
   animation-duration: 1.4s;
   animation-direction: reverse;
   inset: 12px;
@@ -233,10 +239,10 @@
   border-radius: 50%;
   background: linear-gradient(
     135deg,
-    var(--chroma-blue) 0%,
-    var(--chroma-green) 33%,
-    var(--chroma-purple) 66%,
-    var(--chroma-orange) 100%
+    var(--seurat-blue) 0%,
+    var(--seurat-sage) 33%,
+    var(--seurat-violet) 66%,
+    var(--seurat-terra) 100%
   );
   animation: pulse 1.5s ease-in-out infinite;
 }
@@ -247,11 +253,11 @@
 }
 
 @keyframes pulse {
-  0%, 100% { 
+  0%, 100% {
     opacity: 1;
     transform: scale(1);
   }
-  50% { 
+  50% {
     opacity: 0.7;
     transform: scale(0.9);
   }
@@ -289,8 +295,8 @@
 }
 
 .addButton:hover {
-  background: var(--chroma-green-muted);
-  color: var(--chroma-green);
+  background: var(--seurat-sage-muted);
+  color: var(--seurat-sage);
 }
 
 .addButton:active {
@@ -302,8 +308,8 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%), 
-    rgba(90, 154, 232, 0.3) 0%, 
+  background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%),
+    rgba(91, 143, 185, 0.3) 0%,
     transparent 60%
   );
   opacity: 0;
@@ -327,10 +333,10 @@
   padding: var(--space-6) var(--space-4);
   background: linear-gradient(
     180deg,
-    rgba(250, 248, 245, 0.4) 0%,
-    rgba(250, 248, 245, 0.2) 100%
+    rgba(248, 250, 252, 0.4) 0%,
+    rgba(248, 250, 252, 0.2) 100%
   );
-  border: 1.5px dashed rgba(138, 125, 112, 0.25);
+  border: 1.5px dashed rgba(122, 130, 144, 0.25);
   border-radius: var(--radius-lg);
   transition: all 0.3s ease;
 }
@@ -338,10 +344,10 @@
 .emptyStateCard:hover {
   background: linear-gradient(
     180deg,
-    rgba(250, 248, 245, 0.6) 0%,
-    rgba(250, 248, 245, 0.3) 100%
+    rgba(248, 250, 252, 0.6) 0%,
+    rgba(248, 250, 252, 0.3) 100%
   );
-  border-color: rgba(138, 125, 112, 0.4);
+  border-color: rgba(122, 130, 144, 0.4);
   transform: translateY(-1px);
 }
 
@@ -352,10 +358,10 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius);
-  background: rgba(250, 248, 245, 0.8);
-  box-shadow: 
+  background: rgba(248, 250, 252, 0.8);
+  box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 2px 8px rgba(45, 40, 36, 0.06);
+    0 2px 8px rgba(44, 48, 56, 0.06);
 }
 
 .emptyStateIcon svg {
@@ -397,6 +403,8 @@
     max-height: none;
     min-height: auto;
     height: 100%;
+    background: transparent;
+    padding: 0;
   }
 
   /* Hide header on mobile - tab bar shows this info */
@@ -449,13 +457,13 @@
 .columnCollapsible .addButton {
   margin-top: var(--space-3);
   padding: var(--space-4);
-  background: rgba(138, 125, 112, 0.06);
-  border: 1px dashed rgba(138, 125, 112, 0.2);
+  background: rgba(122, 130, 144, 0.06);
+  border: 1px dashed rgba(122, 130, 144, 0.2);
   border-radius: var(--radius-md);
   font-size: var(--text-base);
   min-height: 52px;
 }
 
 .columnCollapsible .addButton:active {
-  background: rgba(138, 125, 112, 0.1);
+  background: rgba(122, 130, 144, 0.1);
 }
